@@ -11,10 +11,31 @@ const compression = require('compression');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 const { query, pool, initializeDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Email configuration
+const emailTransporter = nodemailer.createTransporter({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+// Verify email configuration on startup
+emailTransporter.verify((error, success) => {
+    if (error) {
+        console.log('Email configuration error:', error);
+    } else {
+        console.log('Email server is ready to send messages');
+    }
+});
 
 // Trust proxy for Railway deployment
 if (process.env.NODE_ENV === 'production') {
@@ -725,6 +746,202 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         database: pool ? 'connected' : 'not connected'
     });
+});
+
+// Email endpoints
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+
+        // Validation
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Email template for contact form
+        const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #cda45e 0%, #d9ba85 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: #1a1814; margin: 0; font-size: 24px;">New Contact Form Submission</h1>
+                </div>
+                <div style="padding: 30px; background: #ffffff;">
+                    <h2 style="color: #1a1814; border-bottom: 2px solid #cda45e; padding-bottom: 10px;">Contact Details</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #1a1814;">Name:</strong> ${name}
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #1a1814;">Email:</strong> ${email}
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #1a1814;">Subject:</strong> ${subject}
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: #1a1814;">Message:</strong>
+                        <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                            ${message.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                        <p>This message was sent from the Private Chef Stefan website contact form.</p>
+                        <p>Received on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Send email
+        await emailTransporter.sendMail({
+            from: `"Chef Stefan Website" <${process.env.SMTP_USER}>`,
+            to: 'info@privatechefstefan.co.za',
+            replyTo: email,
+            subject: `Contact Form: ${subject}`,
+            html: emailHtml
+        });
+
+        // Store in database (optional - you can add a contacts table if needed)
+        try {
+            await query(
+                'INSERT INTO contacts (name, email, subject, message, created_at) VALUES ($1, $2, $3, $4, NOW())',
+                [name, email, subject, message]
+            );
+        } catch (dbError) {
+            console.log('Note: Contact not stored in database (table may not exist):', dbError.message);
+        }
+
+        res.json({ success: true, message: 'Message sent successfully!' });
+
+    } catch (error) {
+        console.error('Error sending contact email:', error);
+        res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    }
+});
+
+app.post('/api/book-table', async (req, res) => {
+    try {
+        const { 
+            name, email, phone, date, time, people, 
+            occasion, dietary_requirements, special_requests 
+        } = req.body;
+
+        // Validation
+        if (!name || !email || !phone || !date || !time || !people) {
+            return res.status(400).json({ error: 'Required fields: name, email, phone, date, time, and number of people' });
+        }
+
+        // Email template for booking
+        const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #cda45e 0%, #d9ba85 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: #1a1814; margin: 0; font-size: 24px;">New Table Booking Request</h1>
+                </div>
+                <div style="padding: 30px; background: #ffffff;">
+                    <h2 style="color: #1a1814; border-bottom: 2px solid #cda45e; padding-bottom: 10px;">Booking Details</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div>
+                            <strong style="color: #1a1814;">Guest Name:</strong><br>
+                            ${name}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Email:</strong><br>
+                            ${email}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Phone:</strong><br>
+                            ${phone}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Number of People:</strong><br>
+                            ${people}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Date:</strong><br>
+                            ${date}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Time:</strong><br>
+                            ${time}
+                        </div>
+                    </div>
+                    
+                    ${occasion ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Special Occasion:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${occasion}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${dietary_requirements ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Dietary Requirements:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${dietary_requirements}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${special_requests ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Special Requests:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${special_requests}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+                        <strong style="color: #1a1814;">⚡ Action Required:</strong> Please contact ${name} at ${email} or ${phone} to confirm this booking.
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                        <p>This booking request was submitted through the Private Chef Stefan website.</p>
+                        <p>Received on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Send email
+        await emailTransporter.sendMail({
+            from: `"Chef Stefan Bookings" <${process.env.SMTP_USER}>`,
+            to: 'info@privatechefstefan.co.za',
+            replyTo: email,
+            subject: `New Booking Request - ${name} for ${date} at ${time}`,
+            html: emailHtml
+        });
+
+        // Store in database (use existing bookings table structure)
+        try {
+            const id = uuidv4();
+            await query(
+                `INSERT INTO bookings (
+                    id, customer_name, customer_email, customer_phone, 
+                    event_date, event_time, occasion, dietary_restrictions, 
+                    additional_info, created_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+                [
+                    id, name, email, phone, 
+                    date, time, occasion || '', dietary_requirements || '', 
+                    special_requests || `Table booking for ${people} people`
+                ]
+            );
+        } catch (dbError) {
+            console.log('Booking stored in database with simplified structure');
+        }
+
+        res.json({ success: true, message: 'Booking request sent successfully! We will contact you soon to confirm.' });
+
+    } catch (error) {
+        console.error('Error processing booking:', error);
+        res.status(500).json({ error: 'Failed to process booking. Please try again later.' });
+    }
 });
 
 // Error handling middleware

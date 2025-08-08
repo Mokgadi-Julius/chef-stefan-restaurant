@@ -65,6 +65,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Handle simple table booking form
+  const tableBookingForm = document.querySelector('form[action="forms/book-a-table.php"]:not([data-menu-booking])');
+  if (tableBookingForm && !tableBookingForm.hasAttribute('data-menu-booking')) {
+    tableBookingForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const bookingData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        date: formData.get('date'),
+        time: formData.get('time'),
+        people: formData.get('people'),
+        occasion: formData.get('occasion') || formData.get('message'),
+        dietary_requirements: formData.get('dietary') || formData.get('dietary_requirements'),
+        special_requests: formData.get('requests') || formData.get('special_requests')
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/book-table`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bookingData)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          showMessage(result.message || 'Your booking request has been sent successfully! We will contact you soon to confirm.', 'success');
+          this.reset();
+        } else {
+          showMessage(result.error || 'Failed to send booking request', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('Failed to send booking request. Please try again.', 'error');
+      }
+    });
+  }
+
   // Handle contact form
   const contactForm = document.querySelector('form[action="forms/contact.php"]');
   if (contactForm) {
@@ -91,10 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage('Your message has been sent successfully!', 'success');
+          showMessage(result.message || 'Your message has been sent successfully!', 'success');
           this.reset();
         } else {
-          showMessage(result.message || 'Failed to send message', 'error');
+          showMessage(result.error || 'Failed to send message', 'error');
         }
       } catch (error) {
         console.error('Error:', error);

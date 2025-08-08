@@ -135,6 +135,18 @@ const initializeDatabase = async () => {
             CREATE INDEX IF NOT EXISTS IDX_session_expire ON sessions(expire)
         `);
 
+        // Contacts table for storing contact form submissions
+        await query(`
+            CREATE TABLE IF NOT EXISTS contacts (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                subject VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `).catch(() => {}); // Ignore if exists
+
         console.log('Database tables initialized successfully');
     } catch (err) {
         if (err.message.includes('already exists') || err.message.includes('relation') && err.message.includes('already exists')) {
