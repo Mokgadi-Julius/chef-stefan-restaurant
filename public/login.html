@@ -37,7 +37,8 @@
             background: linear-gradient(135deg, var(--dark-color) 0%, var(--light-dark) 50%, #2c3e50 100%);
             min-height: 100vh;
             font-family: "Open Sans", sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -56,6 +57,7 @@
 
         .login-wrapper {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -383,15 +385,25 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .login-wrapper {
+                min-height: 100vh;
+                min-height: 100dvh;
+                padding: 15px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
             .login-container {
                 grid-template-columns: 1fr;
                 max-width: 450px;
-                margin: 10px;
+                margin: 0 auto;
+                min-height: auto;
+                width: 100%;
             }
 
             .login-brand {
                 padding: 40px 30px;
-                min-height: 300px;
+                min-height: 280px;
             }
 
             .login-form-panel {
@@ -427,26 +439,32 @@
         
         @media (max-width: 480px) {
             body {
-                padding: 5px;
+                padding: 0;
             }
 
             .login-wrapper {
                 padding: 10px;
+                min-height: 100vh;
+                min-height: 100dvh;
+                align-items: flex-start;
+                padding-top: 15px;
             }
 
             .login-container {
                 margin: 0;
                 border-radius: 20px;
                 min-height: auto;
+                width: 100%;
+                max-width: 100%;
             }
             
             .login-brand {
-                padding: 30px 20px;
-                min-height: 250px;
+                padding: 25px 20px;
+                min-height: 220px;
             }
 
             .login-form-panel {
-                padding: 30px 20px;
+                padding: 25px 20px;
             }
 
             .brand-title {
@@ -455,6 +473,32 @@
 
             .form-title {
                 font-size: 1.4rem;
+            }
+        }
+
+        /* Mobile Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .login-wrapper {
+                min-height: 100vh;
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Additional mobile viewport fixes */
+        @media screen and (max-height: 600px) {
+            .login-wrapper {
+                align-items: flex-start;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+            
+            .login-brand {
+                min-height: 200px;
+                padding: 20px;
+            }
+            
+            .login-form-panel {
+                padding: 20px;
             }
         }
 

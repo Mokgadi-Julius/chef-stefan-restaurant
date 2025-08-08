@@ -125,15 +125,11 @@ const initializeDatabase = async () => {
         // Sessions table for connect-pg-simple
         await query(`
             CREATE TABLE IF NOT EXISTS sessions (
-                sid VARCHAR NOT NULL COLLATE "default",
+                sid VARCHAR NOT NULL COLLATE "default" PRIMARY KEY,
                 sess JSON NOT NULL,
                 expire TIMESTAMP(6) NOT NULL
             )
         `).catch(() => {}); // Ignore if exists
-
-        await query(`
-            ALTER TABLE sessions ADD CONSTRAINT sessions_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE
-        `).catch(() => {}); // Ignore if constraint exists
 
         await query(`
             CREATE INDEX IF NOT EXISTS IDX_session_expire ON sessions(expire)

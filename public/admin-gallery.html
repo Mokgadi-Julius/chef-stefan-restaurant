@@ -311,13 +311,13 @@
 
         .gallery-title {
             font-weight: 600;
-            color: var(--dark-color);
+            color: var(--dark-color) !important;
             margin-bottom: 5px;
             font-size: 1rem;
         }
 
         .gallery-description {
-            color: #6c757d;
+            color: #6c757d !important;
             font-size: 0.85rem;
             margin-bottom: 10px;
             line-height: 1.4;
@@ -332,7 +332,7 @@
 
         .gallery-type {
             background: rgba(205, 164, 94, 0.1);
-            color: var(--primary-color);
+            color: var(--primary-color) !important;
             padding: 4px 8px;
             border-radius: 20px;
             font-size: 0.75rem;
@@ -341,7 +341,7 @@
 
         .featured-badge {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: var(--dark-color);
+            color: var(--dark-color) !important;
             padding: 4px 8px;
             border-radius: 15px;
             font-size: 0.7rem;
@@ -592,13 +592,35 @@
             top: 5px;
             right: 5px;
             background: rgba(220, 53, 69, 0.9);
-            color: white;
+            color: white !important;
             border: none;
             border-radius: 50%;
             width: 25px;
             height: 25px;
             font-size: 0.8rem;
             cursor: pointer;
+        }
+        
+        /* Additional fixes for text visibility */
+        .form-label {
+            color: var(--dark-color) !important;
+            font-weight: 500;
+        }
+        
+        .modal-body label {
+            color: var(--dark-color) !important;
+        }
+        
+        .form-check-label {
+            color: var(--dark-color) !important;
+        }
+        
+        .upload-text {
+            color: #6c757d !important;
+        }
+        
+        .upload-subtext {
+            color: #adb5bd !important;
         }
     </style>
 </head>

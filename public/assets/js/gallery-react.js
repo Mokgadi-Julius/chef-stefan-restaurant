@@ -3,7 +3,7 @@
  * Enhanced version with real-time updates and no caching issues
  */
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 // Load React gallery component for homepage
 function loadReactGallery() {

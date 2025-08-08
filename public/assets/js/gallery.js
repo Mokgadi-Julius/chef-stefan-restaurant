@@ -3,7 +3,7 @@
  * Loads images from backend API and displays them beautifully
  */
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 // Load gallery images for index page (featured images only)
 async function loadIndexGallery() {

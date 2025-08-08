@@ -16,6 +16,11 @@ const { query, pool, initializeDatabase } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Railway deployment
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Middleware
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -41,7 +46,8 @@ if (pool) {
         cookie: {
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true,
-            maxAge: 30 * 24 * 60 * 60 * 1000
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'lax'
         }
     }));
 } else {
@@ -52,7 +58,8 @@ if (pool) {
         cookie: {
             secure: false,
             httpOnly: true,
-            maxAge: 30 * 24 * 60 * 60 * 1000
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'lax'
         }
     }));
 }

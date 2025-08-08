@@ -289,7 +289,7 @@ let galleryImages = [];
 // Load gallery images from backend
 async function loadGalleryImagesFromAPI() {
   try {
-    const response = await fetch('http://localhost:3000/api/gallery');
+    const response = await fetch('/api/gallery');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
