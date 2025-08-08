@@ -285,7 +285,7 @@ function insertDefaultData() {
                     adminId,
                     'Chef',
                     'Stefan',
-                    'admin@chefstefan.co.za',
+                    'info@privatechefstefan.co.za',
                     hashedPassword,
                     'admin',
                     1
@@ -295,7 +295,7 @@ function insertDefaultData() {
                     } else {
                         console.log('Default admin user created');
                         console.log('Login credentials:');
-                        console.log('Email: admin@chefstefan.co.za');
+                        console.log('Email: info@privatechefstefan.co.za');
                         console.log('Password: admin123');
                         console.log('*** Please change the default password after first login ***');
                     }

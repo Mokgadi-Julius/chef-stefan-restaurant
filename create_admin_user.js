@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const { query } = require('./database');
 
 async function createAdminUser() {
-    const email = 'admin@privatechefstefan.co.za';
+    const email = 'info@privatechefstefan.co.za';
     const password = '@dmin@123';
     const firstName = 'Admin';
     const lastName = 'User';

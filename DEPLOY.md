@@ -36,7 +36,7 @@
    ```
 
 2. **Default Admin Credentials**
-   - Email: `admin@privatechefstefan.co.za`
+   - Email: `info@privatechefstefan.co.za`
    - Password: `@dmin@123`
    - **⚠️ Change these credentials immediately after first login!**
 
