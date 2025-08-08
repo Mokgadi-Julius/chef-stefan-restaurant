@@ -12,7 +12,8 @@
     "test-db": "node test-db.js",
     "railway:migrate": "npm run migrate",
     "railway:create-admin": "npm run create-admin",
-    "railway:test-db": "npm run test-db"
+    "railway:test-db": "npm run test-db",
+    "verify": "node verify-setup.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
