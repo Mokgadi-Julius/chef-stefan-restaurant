@@ -8,5 +8,11 @@
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE"
-  }
+  },
+  "volumes": [
+    {
+      "mountPath": "/app/uploads",
+      "size": "1GB"
+    }
+  ]
 }
