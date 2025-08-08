@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Chef Stefan's Culinary Blog | Professional Private Chef Insights & Recipes</title>
+  <meta content="Discover culinary insights, recipes, and behind-the-scenes stories from Chef Stefan Bekker's 19 years of fine dining experience. Professional cooking tips and Cape Town food scene updates." name="description">
+  <meta content="chef stefan blog, private chef recipes, culinary insights, fine dining techniques, cape town food, professional cooking tips, gourmet recipes, chef techniques" name="keywords">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Chef Stefan Bekker">
+  <link rel="canonical" href="https://chefstefan.co.za/blog.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chefstefan.co.za/blog.html">
+  <meta property="og:title" content="Chef Stefan's Culinary Blog | Professional Insights & Recipes">
+  <meta property="og:description" content="Discover culinary insights and recipes from an award-winning private chef with 19 years of fine dining experience.">
+  <meta property="og:image" content="https://chefstefan.co.za/assets/img/blog-hero.jpg">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <link href="assets/css/style.css?v=1.0.1" rel="stylesheet">
+
+  <!-- Blog Specific Styles -->
+  <style>
+    .blog-hero {
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/img/hero-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      color: white;
+    }
+
+    .blog-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      margin-bottom: 30px;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(205, 164, 94, 0.2);
+      border-color: rgba(205, 164, 94, 0.3);
+    }
+
+    .blog-card-image {
+      height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .blog-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .blog-card:hover .blog-card-image img {
+      transform: scale(1.1);
+    }
+
+    .blog-card-content {
+      padding: 25px;
+    }
+
+    .blog-meta {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      color: #cda45e;
+    }
+
+    .blog-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .blog-title {
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      line-height: 1.3;
+    }
+
+    .blog-excerpt {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .blog-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .blog-tag {
+      background: rgba(205, 164, 94, 0.2);
+      color: #cda45e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(205, 164, 94, 0.3);
+    }
+
+    .read-more-btn {
+      background: linear-gradient(45deg, #cda45e, #d9ba85);
+      color: #000;
+      padding: 10px 25px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .read-more-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(205, 164, 94, 0.3);
+      color: #000;
+    }
+
+    .featured-post {
+      background: linear-gradient(135deg, rgba(205, 164, 94, 0.1), rgba(217, 186, 133, 0.05));
+      border: 2px solid rgba(205, 164, 94, 0.3);
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #cda45e;
+      color: #000;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .blog-filter {
+      margin-bottom: 40px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 2px solid rgba(205, 164, 94, 0.3);
+      color: #cda45e;
+      padding: 8px 20px;
+      border-radius: 25px;
+      margin: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #cda45e;
+      color: #000;
+      border-color: #cda45e;
+    }
+
+    .search-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 12px 20px;
+      color: #fff;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #cda45e;
+      box-shadow: 0 0 0 2px rgba(205, 164, 94, 0.2);
+    }
+
+    /* AI-Friendly Structured Data Classes */
+    .blog-post-item {
+      /* This class helps AI identify individual blog posts */
+    }
+
+    .blog-post-metadata {
+      /* This class helps AI extract post metadata */
+    }
+
+    .blog-post-summary {
+      /* This class helps AI identify post summaries */
+    }
+  </style>
+
+  <!-- Structured Data for Blog -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Chef Stefan's Culinary Blog",
+    "description": "Professional culinary insights, recipes, and behind-the-scenes stories from Chef Stefan Bekker",
+    "url": "https://chefstefan.co.za/blog.html",
+    "author": {
+      "@type": "Person",
+      "name": "Stefan Bekker",
+      "jobTitle": "Executive Chef",
+      "description": "International award-winning chef with 19 years experience in 5-star properties"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Chef Stefan Private Chef Services",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://chefstefan.co.za/assets/img/chef-stefan-logo.jpg"
+      }
+    }
+  }
+  </script>
+</head>
+
+<body>
+
+  <div id="topbar" class="d-flex align-items-center fixed-top">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+      <div class="contact-info d-flex align-items-center">
+        <i class="bi bi-phone d-flex align-items-center"><span>+27 81 442 7434</span></i>
+        <i class="bi bi-clock d-flex align-items-center ms-4"><span> Available 7 Days</span></i>
+      </div>
+      <div class="languages d-none d-md-flex align-items-center">
+        <ul>
+          <li><a href="index.html#book-a-table">Book Chef</a></li>
+          <li> / </li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top d-flex align-items-center">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-lg-between">
+      <h1 class="logo me-auto me-lg-0"><a href="index.html"><img src="assets/img/logo.png" alt="Chef Stefan Logo" class="img-fluid me-2" style="height: 40px;"><span class="d-none d-md-inline">Private Chef Stefan</span></a></h1>
+      <nav id="navbar" class="navbar order-last order-lg-0">
+        <ul>
+          <li><a class="nav-link scrollto" href="index.html#hero">Home</a></li>
+          <li><a class="nav-link scrollto" href="index.html#about">About</a></li>
+          <li><a class="nav-link scrollto" href="index.html#services">Services</a></li>
+          <li><a class="nav-link scrollto" href="menu.html">Menu</a></li>
+          <li><a class="nav-link scrollto" href="chef-info.html">Chef Info</a></li>
+          <li><a class="nav-link scrollto active" href="blog.html">Blog</a></li>
+          <li><a class="nav-link scrollto" href="index.html#gallery">Gallery</a></li>
+          <li><a class="nav-link scrollto" href="index.html#contact">Contact</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+      <a href="index.html#book-a-table" class="book-a-table-btn scrollto d-none d-lg-flex">Book Chef</a>
+    </div>
+  </header>
+
+  <!-- ======= Blog Hero Section ======= -->
+  <section class="blog-hero">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8">
+          <h1 data-aos="fade-up">Chef Stefan's Culinary Blog</h1>
+          <p class="lead" data-aos="fade-up" data-aos-delay="100">
+            Discover professional culinary insights, exclusive recipes, and behind-the-scenes stories from 19 years of fine dining excellence.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+    <!-- ======= Blog Content Section ======= -->
+    <section id="blog" class="blog">
+      <div class="container" data-aos="fade-up">
+        
+        <!-- Search and Filter Bar -->
+        <div class="row mb-5">
+          <div class="col-lg-6">
+            <input type="text" class="search-box" placeholder="Search blog posts..." id="blogSearch">
+          </div>
+          <div class="col-lg-6">
+            <div class="blog-filter text-end">
+              <button class="filter-btn active" data-filter="all">All Posts</button>
+              <button class="filter-btn" data-filter="recipes">Recipes</button>
+              <button class="filter-btn" data-filter="techniques">Techniques</button>
+              <button class="filter-btn" data-filter="stories">Stories</button>
+              <button class="filter-btn" data-filter="tips">Tips</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          
+          <!-- Featured Blog Post -->
+          <div class="col-lg-8 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <article class="blog-post-item blog-card featured-post">
+              <div class="featured-badge">Featured</div>
+              <div class="blog-card-image">
+                <img src="assets/img/gallery/gallery-1.jpeg" alt="The Art of Plating: Creating Visual Masterpieces">
+              </div>
+              <div class="blog-card-content">
+                <div class="blog-post-metadata blog-meta">
+                  <span><i class="bi bi-calendar"></i> January 15, 2025</span>
+                  <span><i class="bi bi-person"></i> Chef Stefan</span>
+                  <span><i class="bi bi-eye"></i> 1,245 views</span>
+                </div>
+                <h2 class="blog-title">The Art of Plating: Creating Visual Masterpieces</h2>
+                <div class="blog-tags">
+                  <span class="blog-tag">Techniques</span>
+                  <span class="blog-tag">Fine Dining</span>
+                  <span class="blog-tag">Presentation</span>
+                </div>
+                <div class="blog-post-summary blog-excerpt">
+                  After 19 years in fine dining, I've learned that we eat with our eyes first. In this comprehensive guide, I share my professional techniques for creating stunning plate presentations that elevate any dish from good to extraordinary. Learn the principles of balance, color theory, and texture contrast that top restaurants use.
+                </div>
+                <a href="blog-post.html?id=plating-masterpieces" class="read-more-btn">
+                  Read Full Article <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="col-lg-4">
+            <aside class="blog-sidebar">
+              
+              <!-- About Chef Section -->
+              <div class="blog-card mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="blog-card-content">
+                  <h3>About Chef Stefan</h3>
+                  <img src="assets/img/chefs/chefs-6.jpeg" alt="Chef Stefan Bekker" class="img-fluid rounded mb-3">
+                  <p class="blog-excerpt">
+                    International award-winning chef with 19 years of 5-star experience. Sharing insights from Cape Town's finest kitchens to your home.
+                  </p>
+                  <a href="chef-info.html" class="read-more-btn">Learn More</a>
+                </div>
+              </div>
+
+              <!-- Recent Posts -->
+              <div class="blog-card mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="blog-card-content">
+                  <h3>Recent Posts</h3>
+                  <div class="recent-post mb-3">
+                    <h6><a href="blog-post.html?id=seasonal-menu-planning" style="color: #cda45e;">Seasonal Menu Planning: Working with Cape Town's Best Ingredients</a></h6>
+                    <small class="text-muted">January 10, 2025</small>
+                  </div>
+                  <div class="recent-post mb-3">
+                    <h6><a href="blog-post.html?id=private-chef-experience" style="color: #cda45e;">What to Expect: Your First Private Chef Experience</a></h6>
+                    <small class="text-muted">January 5, 2025</small>
+                  </div>
+                  <div class="recent-post mb-3">
+                    <h6><a href="blog-post.html?id=wine-pairing-basics" style="color: #cda45e;">Wine Pairing Basics: Elevating Your Dinner Party</a></h6>
+                    <small class="text-muted">December 28, 2024</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Categories -->
+              <div class="blog-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="blog-card-content">
+                  <h3>Categories</h3>
+                  <ul class="list-unstyled">
+                    <li><a href="#" style="color: #cda45e;"><i class="bi bi-chevron-right"></i> Professional Techniques (8)</a></li>
+                    <li><a href="#" style="color: #cda45e;"><i class="bi bi-chevron-right"></i> Exclusive Recipes (12)</a></li>
+                    <li><a href="#" style="color: #cda45e;"><i class="bi bi-chevron-right"></i> Behind the Scenes (6)</a></li>
+                    <li><a href="#" style="color: #cda45e;"><i class="bi bi-chevron-right"></i> Industry Insights (4)</a></li>
+                    <li><a href="#" style="color: #cda45e;"><i class="bi bi-chevron-right"></i> Client Stories (9)</a></li>
+                  </ul>
+                </div>
+              </div>
+
+            </aside>
+          </div>
+
+        </div>
+
+        <!-- Blog Posts Grid -->
+        <div class="row">
+          
+          <!-- Blog Post 1 -->
+          <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <article class="blog-post-item blog-card" data-category="recipes">
+              <div class="blog-card-image">
+                <img src="assets/img/gallery/gallery-2.jpeg" alt="5-Course Tasting Menu: A Journey Through Flavors">
+              </div>
+              <div class="blog-card-content">
+                <div class="blog-post-metadata blog-meta">
+                  <span><i class="bi bi-calendar"></i> January 12, 2025</span>
+                  <span><i class="bi bi-clock"></i> 8 min read</span>
+                </div>
+                <h3 class="blog-title">5-Course Tasting Menu: A Journey Through Flavors</h3>
+                <div class="blog-tags">
+                  <span class="blog-tag">Recipes</span>
+                  <span class="blog-tag">Fine Dining</span>
+                  <span class="blog-tag">Menu Planning</span>
+                </div>
+                <div class="blog-post-summary blog-excerpt">
+                  Create an unforgettable dining experience with this carefully curated 5-course tasting menu. Each dish builds upon the last, taking your guests on a culinary journey that showcases the best of seasonal ingredients and professional techniques.
+                </div>
+                <a href="blog-post.html?id=5-course-tasting-menu" class="read-more-btn">
+                  Read Recipe <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <!-- Blog Post 2 -->
+          <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <article class="blog-post-item blog-card" data-category="techniques">
+              <div class="blog-card-image">
+                <img src="assets/img/gallery/gallery-3.jpeg" alt="Knife Skills Every Home Cook Should Master">
+              </div>
+              <div class="blog-card-content">
+                <div class="blog-post-metadata blog-meta">
+                  <span><i class="bi bi-calendar"></i> January 8, 2025</span>
+                  <span><i class="bi bi-clock"></i> 6 min read</span>
+                </div>
+                <h3 class="blog-title">Knife Skills Every Home Cook Should Master</h3>
+                <div class="blog-tags">
+                  <span class="blog-tag">Techniques</span>
+                  <span class="blog-tag">Basics</span>
+                  <span class="blog-tag">Tutorial</span>
+                </div>
+                <div class="blog-post-summary blog-excerpt">
+                  Proper knife skills are the foundation of great cooking. Learn the essential cuts and techniques that professional chefs use daily, from basic julienne to advanced chiffonade. Includes safety tips and knife maintenance guide.
+                </div>
+                <a href="blog-post.html?id=knife-skills-mastery" class="read-more-btn">
+                  Watch Tutorial <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <!-- Blog Post 3 -->
+          <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <article class="blog-post-item blog-card" data-category="stories">
+              <div class="blog-card-image">
+                <img src="assets/img/gallery/gallery-4.jpeg" alt="From Cape Town to Nairobi: My Culinary Journey">
+              </div>
+              <div class="blog-card-content">
+                <div class="blog-post-metadata blog-meta">
+                  <span><i class="bi bi-calendar"></i> January 3, 2025</span>
+                  <span><i class="bi bi-clock"></i> 10 min read</span>
+                </div>
+                <h3 class="blog-title">From Cape Town to Nairobi: My Culinary Journey</h3>
+                <div class="blog-tags">
+                  <span class="blog-tag">Stories</span>
+                  <span class="blog-tag">Personal</span>
+                  <span class="blog-tag">Travel</span>
+                </div>
+                <div class="blog-post-summary blog-excerpt">
+                  Join me as I share stories from my 19-year culinary journey, from humble beginnings in Cape Town to consulting for luxury safari lodges in Kenya. Discover how different cultures and ingredients have shaped my cooking philosophy.
+                </div>
+                <a href="blog-post.html?id=culinary-journey" class="read-more-btn">
+                  Read Story <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <!-- Blog Post 4 -->
+          <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+            <article class="blog-post-item blog-card" data-category="tips">
+              <div class="blog-card-image">
+                <img src="assets/img/gallery/gallery-5.jpeg" alt="Hosting Like a Pro: Private Chef Secrets for Home Entertaining">
+              </div>
+              <div class="blog-card-content">
+                <div class="blog-post-metadata blog-meta">
+                  <span><i class="bi bi-calendar"></i> December 30, 2024</span>
+                  <span><i class="bi bi-clock"></i> 7 min read</span>
+                </div>
+                <h3 class="blog-title">Hosting Like a Pro: Private Chef Secrets for Home Entertaining</h3>
+                <div class="blog-tags">
+                  <span class="blog-tag">Tips</span>
+                  <span class="blog-tag">Entertaining</span>
+                  <span class="blog-tag">Planning</span>
+                </div>
+                <div class="blog-post-summary blog-excerpt">
+                  Learn the professional secrets that make dinner parties effortless and memorable. From timeline planning to stress-free execution, discover how to entertain with confidence using techniques from 5-star hospitality.
+                </div>
+                <a href="blog-post.html?id=hosting-like-pro" class="read-more-btn">
+                  Get Tips <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+        </div>
+
+        <!-- Load More Button -->
+        <div class="text-center mt-5" data-aos="fade-up">
+          <button class="read-more-btn" id="loadMorePosts">
+            Load More Posts <i class="bi bi-arrow-down ms-2"></i>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="newsletter-signup section-bg">
+      <div class="container" data-aos="fade-up">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <h2>Stay Updated with Chef Stefan's Latest Insights</h2>
+            <p class="lead mb-4">Get exclusive recipes, professional tips, and behind-the-scenes stories delivered to your inbox.</p>
+            <form class="newsletter-form d-flex justify-content-center">
+              <input type="email" class="form-control me-3" placeholder="Enter your email address" style="max-width: 400px; border-radius: 25px; border: 2px solid rgba(205, 164, 94, 0.3);">
+              <button type="submit" class="read-more-btn">Subscribe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3 col-md-6">
+            <div class="footer-info">
+              <h3>Chef Stefan</h3>
+              <p>
+                Cape Town, Stellenbosch<br>
+                Paarl, Somerset West<br><br>
+                <strong>Phone:</strong> +27 81 442 7434<br>
+                <strong>Email:</strong> info@chefstefan.co.za<br>
+              </p>
+              <div class="social-links mt-3">
+                <a href="https://www.instagram.com/privatechefstefan28" target="_blank" class="instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="https://www.facebook.com/privatechefstefan" target="_blank" class="facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="https://www.linkedin.com/in/chef-stefan-bekker" target="_blank" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+                <a href="https://www.youtube.com/@brokenchef33" target="_blank" class="youtube"><i class="bx bxl-youtube"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 footer-links">
+            <h4>Useful Links</h4>
+            <ul>
+              <li><i class="bx bx-chevron-right"></i> <a href="index.html#hero">Home</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="index.html#about">About</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="index.html#services">Services</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="blog.html">Blog</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="chef-info.html">Chef Info</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-3 col-md-6 footer-links">
+            <h4>Blog Categories</h4>
+            <ul>
+              <li><i class="bx bx-chevron-right"></i> <a href="#blog">Professional Techniques</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#blog">Exclusive Recipes</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#blog">Behind the Scenes</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#blog">Industry Insights</a></li>
+              <li><i class="bx bx-chevron-right"></i> <a href="#blog">Client Stories</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-4 col-md-6 footer-newsletter">
+            <h4>Book Your Experience</h4>
+            <p>Ready to enjoy professional private chef services? Contact us for a bespoke culinary experience.</p>
+            <div class="mt-3">
+              <a href="index.html#book-a-table" class="btn btn-primary">Book Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>Chef Stefan</span></strong>. All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <!-- Blog Functionality -->
+  <script>
+    // Blog Filter Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const blogPosts = document.querySelectorAll('.blog-post-item');
+      const searchBox = document.getElementById('blogSearch');
+
+      // Filter functionality
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Remove active class from all buttons
+          filterBtns.forEach(b => b.classList.remove('active'));
+          // Add active class to clicked button
+          btn.classList.add('active');
+          
+          const filter = btn.getAttribute('data-filter');
+          
+          blogPosts.forEach(post => {
+            if (filter === 'all' || post.getAttribute('data-category') === filter) {
+              post.closest('.col-lg-6, .col-lg-8').style.display = 'block';
+            } else {
+              post.closest('.col-lg-6, .col-lg-8').style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Search functionality
+      searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        blogPosts.forEach(post => {
+          const title = post.querySelector('.blog-title').textContent.toLowerCase();
+          const excerpt = post.querySelector('.blog-excerpt').textContent.toLowerCase();
+          const tags = Array.from(post.querySelectorAll('.blog-tag')).map(tag => tag.textContent.toLowerCase()).join(' ');
+          
+          if (title.includes(searchTerm) || excerpt.includes(searchTerm) || tags.includes(searchTerm)) {
+            post.closest('.col-lg-6, .col-lg-8').style.display = 'block';
+          } else {
+            post.closest('.col-lg-6, .col-lg-8').style.display = 'none';
+          }
+        });
+      });
+
+      // Load more functionality (placeholder)
+      document.getElementById('loadMorePosts').addEventListener('click', function() {
+        // In a real implementation, this would load more posts via AJAX
+        alert('More posts would be loaded here via AJAX in a real implementation.');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Gallery Admin - Chef Stefan</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        
+        .gallery-card {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .gallery-info {
+            padding: 15px;
+        }
+        
+        .gallery-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .gallery-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            min-height: 20px;
+        }
+        
+        .gallery-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        
+        .gallery-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #d4a574;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #fefefe;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #b8956a;
+            background: #f9f7f4;
+        }
+        
+        .upload-zone.uploading {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #d4a574, #b8956a);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #d4a574;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .badge-custom {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="gallery-admin-root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        const API_BASE = 'http://localhost:3000/api';
+        
+        function GalleryAdmin() {
+            const [images, setImages] = useState([]);
+            const [filteredImages, setFilteredImages] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [currentFilter, setCurrentFilter] = useState('all');
+            const [uploading, setUploading] = useState(false);
+            const [message, setMessage] = useState('');
+            const [messageType, setMessageType] = useState('');
+            const fileInputRef = useRef(null);
+            
+            // Load gallery images
+            const loadGallery = async () => {
+                try {
+                    setLoading(true);
+                    const response = await fetch(`${API_BASE}/gallery`);
+                    const data = await response.json();
+                    setImages(data);
+                    filterImages(data, currentFilter);
+                    showMessage(`Loaded ${data.length} images`, 'success');
+                } catch (error) {
+                    console.error('Error loading gallery:', error);
+                    showMessage('Error loading gallery: ' + error.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            // Filter images by category
+            const filterImages = (imageList, filter) => {
+                if (filter === 'all') {
+                    setFilteredImages(imageList);
+                } else {
+                    setFilteredImages(imageList.filter(img => img.category === filter));
+                }
+            };
+            
+            // Handle filter change
+            const handleFilterChange = (filter) => {
+                setCurrentFilter(filter);
+                filterImages(images, filter);
+            };
+            
+            // Show message
+            const showMessage = (msg, type) => {
+                setMessage(msg);
+                setMessageType(type);
+                setTimeout(() => {
+                    setMessage('');
+                    setMessageType('');
+                }, 5000);
+            };
+            
+            // Handle file upload
+            const handleFileUpload = async (file) => {
+                if (!file || !file.type.startsWith('image/')) {
+                    showMessage('Please select a valid image file', 'error');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('title', file.name.split('.')[0]);
+                formData.append('description', '');
+                formData.append('category', 'general');
+                formData.append('featured', 'false');
+                formData.append('displayOnIndex', 'true');
+                
+                try {
+                    setUploading(true);
+                    const response = await fetch(`${API_BASE}/gallery`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showMessage(`Image "${result.title}" uploaded successfully!`, 'success');
+                        loadGallery(); // Reload gallery
+                    } else {
+                        showMessage(result.error || 'Upload failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showMessage('Upload failed: ' + error.message, 'error');
+                } finally {
+                    setUploading(false);
+                }
+            };
+            
+            // Handle drag and drop
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            };
+            
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.currentTarget.classList.add('dragover');
+            };
+            
+            const handleDragLeave = (e) => {
+                e.currentTarget.classList.remove('dragover');
+            };
+            
+            // Toggle featured status
+            const toggleFeatured = async (imageId, currentStatus) => {
+                try {
+                    const response = await fetch(`${API_BASE}/gallery/${imageId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ featured: !currentStatus })
+                    });
+                    
+                    if (response.ok) {
+                        loadGallery();
+                        showMessage('Image updated successfully', 'success');
+                    }
+                } catch (error) {
+                    showMessage('Error updating image: ' + error.message, 'error');
+                }
+            };
+            
+            // Delete image
+            const deleteImage = async (imageId, title) => {
+                if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+                
+                try {
+                    const response = await fetch(`${API_BASE}/gallery/${imageId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        loadGallery();
+                        showMessage('Image deleted successfully', 'success');
+                    }
+                } catch (error) {
+                    showMessage('Error deleting image: ' + error.message, 'error');
+                }
+            };
+            
+            // Get unique categories
+            const getCategories = () => {
+                const categories = [...new Set(images.map(img => img.category))];
+                return ['all', ...categories];
+            };
+            
+            // Get stats
+            const getStats = () => {
+                return {
+                    total: images.length,
+                    featured: images.filter(img => img.featured).length,
+                    onHomepage: images.filter(img => img.displayOnIndex).length,
+                    categories: getCategories().length - 1
+                };
+            };
+            
+            useEffect(() => {
+                loadGallery();
+            }, []);
+            
+            const stats = getStats();
+            
+            return (
+                <div className="container-fluid py-4">
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h1 className="display-6">
+                                    <i className="fas fa-images me-3" style={{color: '#d4a574'}}></i>
+                                    Gallery Management
+                                </h1>
+                                <button 
+                                    className="btn btn-primary"
+                                    onClick={loadGallery}
+                                    disabled={loading}
+                                >
+                                    {loading ? <span className="loading-spinner me-2"></span> : <i className="fas fa-refresh me-2"></i>}
+                                    Refresh
+                                </button>
+                            </div>
+                            
+                            {/* Stats Card */}
+                            <div className="stats-card">
+                                <div className="row text-center">
+                                    <div className="col-3">
+                                        <h3 className="mb-1">{stats.total}</h3>
+                                        <small>Total Images</small>
+                                    </div>
+                                    <div className="col-3">
+                                        <h3 className="mb-1">{stats.featured}</h3>
+                                        <small>Featured</small>
+                                    </div>
+                                    <div className="col-3">
+                                        <h3 className="mb-1">{stats.onHomepage}</h3>
+                                        <small>On Homepage</small>
+                                    </div>
+                                    <div className="col-3">
+                                        <h3 className="mb-1">{stats.categories}</h3>
+                                        <small>Categories</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Messages */}
+                            {message && (
+                                <div className={messageType === 'error' ? 'error-message' : 'success-message'}>
+                                    <i className={`fas ${messageType === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'} me-2`}></i>
+                                    {message}
+                                </div>
+                            )}
+                            
+                            {/* Upload Zone */}
+                            <div 
+                                className={`upload-zone ${uploading ? 'uploading' : ''}`}
+                                onDrop={handleDrop}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onClick={() => fileInputRef.current?.click()}
+                                style={{cursor: 'pointer'}}
+                            >
+                                {uploading ? (
+                                    <>
+                                        <span className="loading-spinner me-3"></span>
+                                        <h5>Uploading...</h5>
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-cloud-upload-alt fa-3x mb-3" style={{color: '#d4a574'}}></i>
+                                        <h5>Drop images here or click to upload</h5>
+                                        <p className="text-muted">Supports PNG, JPG, JPEG files up to 5MB</p>
+                                    </>
+                                )}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    style={{display: 'none'}}
+                                    onChange={(e) => {
+                                        if (e.target.files[0]) {
+                                            handleFileUpload(e.target.files[0]);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            
+                            {/* Filter Buttons */}
+                            <div className="filter-buttons">
+                                {getCategories().map(category => (
+                                    <button
+                                        key={category}
+                                        className={`btn ${currentFilter === category ? 'btn-primary' : 'btn-outline-primary'}`}
+                                        onClick={() => handleFilterChange(category)}
+                                    >
+                                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                                        {category !== 'all' && (
+                                            <span className="badge bg-light text-dark ms-2">
+                                                {images.filter(img => img.category === category).length}
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            {/* Gallery Grid */}
+                            {loading ? (
+                                <div className="text-center py-5">
+                                    <span className="loading-spinner me-3"></span>
+                                    <h5>Loading gallery...</h5>
+                                </div>
+                            ) : filteredImages.length === 0 ? (
+                                <div className="text-center py-5">
+                                    <i className="fas fa-images fa-3x mb-3 text-muted"></i>
+                                    <h5 className="text-muted">No images found</h5>
+                                    <p className="text-muted">Upload some images to get started!</p>
+                                </div>
+                            ) : (
+                                <div className="gallery-grid">
+                                    {filteredImages.map(image => (
+                                        <div key={image._id} className="gallery-card">
+                                            <img
+                                                src={image.path}
+                                                alt={image.title}
+                                                className="gallery-image"
+                                                onError={(e) => {
+                                                    e.target.style.background = '#f8f9fa';
+                                                    e.target.style.display = 'flex';
+                                                    e.target.style.alignItems = 'center';
+                                                    e.target.style.justifyContent = 'center';
+                                                    e.target.innerHTML = '<i class="fas fa-image fa-2x text-muted"></i>';
+                                                }}
+                                            />
+                                            <div className="gallery-info">
+                                                <div className="gallery-title">{image.title}</div>
+                                                <div className="gallery-description">
+                                                    {image.description || 'No description'}
+                                                </div>
+                                                <div className="gallery-meta">
+                                                    <div><strong>Category:</strong> {image.category}</div>
+                                                    <div><strong>Size:</strong> {Math.round(image.size / 1024)}KB</div>
+                                                    <div><strong>Created:</strong> {new Date(image.createdAt).toLocaleDateString()}</div>
+                                                </div>
+                                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        {image.featured && (
+                                                            <span className="badge bg-warning text-dark badge-custom me-1">
+                                                                <i className="fas fa-star"></i> Featured
+                                                            </span>
+                                                        )}
+                                                        {image.displayOnIndex && (
+                                                            <span className="badge bg-success badge-custom">
+                                                                <i className="fas fa-home"></i> Homepage
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="gallery-actions">
+                                                    <button
+                                                        className={`btn btn-sm ${image.featured ? 'btn-warning' : 'btn-outline-warning'}`}
+                                                        onClick={() => toggleFeatured(image._id, image.featured)}
+                                                        title="Toggle Featured"
+                                                    >
+                                                        <i className="fas fa-star"></i>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        onClick={() => window.open(image.path, '_blank')}
+                                                        title="View Full Size"
+                                                    >
+                                                        <i className="fas fa-external-link-alt"></i>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => deleteImage(image._id, image.title)}
+                                                        title="Delete Image"
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Render the app
+        ReactDOM.render(<GalleryAdmin />, document.getElementById('gallery-admin-root'));
+    </script>
+</body>
+</html>

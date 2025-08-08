@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://chefstefan.co.za/sitemap.xml
+
+# Block access to admin and forms
+Disallow: /forms/
+Disallow: /Admin.html
+Disallow: /authentication.html
+
+# Allow important pages
+Allow: /index.html
+Allow: /pricing.html
+Allow: /chef-info.html
+Allow: /assets/
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Block specific bad bots (optional)
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot  
+Disallow: /

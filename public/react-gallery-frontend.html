@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Chef Stefan</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- GLightbox for image lightbox -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #d4a574, #b8956a);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .gallery-container {
+            padding: 60px 0;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            transition: all 0.4s ease;
+            background: white;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 50px rgba(0,0,0,0.2);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.05);
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.9), rgba(184, 149, 106, 0.9));
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .gallery-info h4 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .gallery-info p {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .view-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.8);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .view-btn:hover {
+            background: white;
+            color: #d4a574;
+            transform: translateY(-2px);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            background: white;
+            border: 2px solid #d4a574;
+            color: #d4a574;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .filter-tab.active, .filter-tab:hover {
+            background: #d4a574;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 80px 0;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d4a574;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .badge-featured {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ffd700;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+        
+        .no-images {
+            text-align: center;
+            padding: 80px 0;
+            color: #666;
+        }
+        
+        .stats-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="fas fa-camera-retro me-3"></i>
+                Chef Stefan's Gallery
+            </h1>
+            <p class="lead">Discover the artistry behind every dish - from elegant presentations to behind-the-scenes culinary excellence</p>
+        </div>
+    </section>
+    
+    <!-- Gallery Container -->
+    <section class="gallery-container">
+        <div class="container">
+            <div id="gallery-root"></div>
+        </div>
+    </section>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const API_BASE = 'http://localhost:3000/api';
+        
+        function Gallery() {
+            const [images, setImages] = useState([]);
+            const [filteredImages, setFilteredImages] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [currentFilter, setCurrentFilter] = useState('all');
+            const [lightbox, setLightbox] = useState(null);
+            
+            // Load gallery images
+            const loadGallery = async () => {
+                try {
+                    setLoading(true);
+                    const response = await fetch(`${API_BASE}/gallery`);
+                    const data = await response.json();
+                    
+                    // Filter for display on index or featured images
+                    const displayImages = data.filter(img => 
+                        img.displayOnIndex || img.featured
+                    );
+                    
+                    setImages(displayImages);
+                    filterImages(displayImages, currentFilter);
+                } catch (error) {
+                    console.error('Error loading gallery:', error);
+                    setImages([]);
+                    setFilteredImages([]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            // Filter images by category
+            const filterImages = (imageList, filter) => {
+                if (filter === 'all') {
+                    setFilteredImages(imageList);
+                } else {
+                    setFilteredImages(imageList.filter(img => img.category === filter));
+                }
+            };
+            
+            // Handle filter change
+            const handleFilterChange = (filter) => {
+                setCurrentFilter(filter);
+                filterImages(images, filter);
+            };
+            
+            // Get unique categories
+            const getCategories = () => {
+                const categories = [...new Set(images.map(img => img.category))];
+                return ['all', ...categories.sort()];
+            };
+            
+            // Initialize lightbox
+            useEffect(() => {
+                if (filteredImages.length > 0 && window.GLightbox) {
+                    // Cleanup existing lightbox
+                    if (lightbox) {
+                        lightbox.destroy();
+                    }
+                    
+                    // Create new lightbox
+                    const newLightbox = GLightbox({
+                        selector: '.gallery-lightbox',
+                        touchNavigation: true,
+                        loop: true,
+                        autoplayVideos: true,
+                    });
+                    
+                    setLightbox(newLightbox);
+                }
+            }, [filteredImages]);
+            
+            useEffect(() => {
+                loadGallery();
+                
+                // Auto-refresh every 30 seconds to show new uploads
+                const interval = setInterval(loadGallery, 30000);
+                return () => clearInterval(interval);
+            }, []);
+            
+            if (loading) {
+                return (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <h4>Loading gallery...</h4>
+                        <p className="text-muted">Preparing our culinary showcase</p>
+                    </div>
+                );
+            }
+            
+            const categories = getCategories();
+            const stats = {
+                total: filteredImages.length,
+                featured: filteredImages.filter(img => img.featured).length
+            };
+            
+            return (
+                <div>
+                    {/* Stats Bar */}
+                    <div className="stats-bar">
+                        <div className="row text-center">
+                            <div className="col-md-4">
+                                <h3 className="text-primary">{images.length}</h3>
+                                <p className="mb-0 text-muted">Total Images</p>
+                            </div>
+                            <div className="col-md-4">
+                                <h3 className="text-warning">{images.filter(img => img.featured).length}</h3>
+                                <p className="mb-0 text-muted">Featured</p>
+                            </div>
+                            <div className="col-md-4">
+                                <h3 className="text-success">{categories.length - 1}</h3>
+                                <p className="mb-0 text-muted">Categories</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Filter Tabs */}
+                    {categories.length > 1 && (
+                        <div className="filter-tabs">
+                            {categories.map(category => (
+                                <div
+                                    key={category}
+                                    className={`filter-tab ${currentFilter === category ? 'active' : ''}`}
+                                    onClick={() => handleFilterChange(category)}
+                                >
+                                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                                    <span className="ms-2">
+                                        ({category === 'all' ? images.length : images.filter(img => img.category === category).length})
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {/* Gallery Grid */}
+                    {filteredImages.length === 0 ? (
+                        <div className="no-images">
+                            <i className="fas fa-images fa-4x mb-3 text-muted"></i>
+                            <h4>No images found</h4>
+                            <p>Check back soon for new culinary creations!</p>
+                        </div>
+                    ) : (
+                        <div className="gallery-grid">
+                            {filteredImages.map(image => (
+                                <div key={image._id} className="gallery-item">
+                                    {image.featured && (
+                                        <div className="badge-featured">
+                                            <i className="fas fa-star me-1"></i>
+                                            Featured
+                                        </div>
+                                    )}
+                                    
+                                    <a 
+                                        href={image.path} 
+                                        className="gallery-lightbox"
+                                        data-gallery="gallery"
+                                        data-title={image.title}
+                                        data-description={image.description}
+                                    >
+                                        <img
+                                            src={image.path}
+                                            alt={image.title}
+                                            className="gallery-image"
+                                            loading="lazy"
+                                            onError={(e) => {
+                                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDMwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjhGOUZBIi8+CjxwYXRoIGQ9Ik0xMjUgOTBDMTMxLjYyNyA5MCAMMzcgOTYuMzczIDEzNyAxMDNTMTQzIDEwMy4zNzMgMTQ5IDEwM0gxNzVDMTgxLjYyNyAxMDMgMTg3IDEwOC4zNzMgMTg3IDExNVYxNDBDMTg3IDE0Ni42MjcgMTgxLjYyNyAxNTIgMTc1IDE1MkgxMjVDMTE4LjM3MyAxNTIgMTEzIDE0Ni42MjcgMTEzIDE0MFYxMDNDMTEzIDk2LjM3MyAxMTguMzczIDkwIDEyNSA5MFoiIGZpbGw9IiNEMUQ1REIiLz4KPHA+CjxyZWN0IHg9IjkwIiB5PSIxNzAiIHdpZHRoPSIxMjAiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNEMUQ1REIiLz4KPHJlY3QgeD0iOTAiIHk9IjE4NSIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRTVFN0VCIi8+Cjwvc3ZnPgo=';
+                                            }}
+                                        />
+                                        
+                                        <div className="gallery-overlay">
+                                            <div className="gallery-info">
+                                                <h4>{image.title}</h4>
+                                                {image.description && (
+                                                    <p>{image.description}</p>
+                                                )}
+                                                <div className="view-btn">
+                                                    <i className="fas fa-search-plus me-2"></i>
+                                                    View Full Size
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {/* Auto-refresh indicator */}
+                    <div className="text-center mt-4">
+                        <small className="text-muted">
+                            <i className="fas fa-sync-alt me-2"></i>
+                            Gallery updates automatically every 30 seconds
+                        </small>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Render the app
+        ReactDOM.render(<Gallery />, document.getElementById('gallery-root'));
+    </script>
+</body>
+</html>

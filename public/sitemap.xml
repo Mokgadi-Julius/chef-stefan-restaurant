@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://chefstefan.co.za/</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://chefstefan.co.za/assets/img/chef-stefan-hero.jpg</image:loc>
+      <image:title>Chef Stefan Bekker - Award-Winning Private Chef Cape Town</image:title>
+      <image:caption>International award-winning private chef with 19 years 5-star experience</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Pricing Page -->
+  <url>
+    <loc>https://chefstefan.co.za/pricing.html</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Chef Information Page -->
+  <url>
+    <loc>https://chefstefan.co.za/chef-info.html</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://chefstefan.co.za/assets/img/chef-stefan-profile.jpg</image:loc>
+      <image:title>Chef Stefan Bekker Professional Portrait</image:title>
+      <image:caption>Executive chef with 19 years experience in luxury hospitality</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Service Pages (anchors to main page) -->
+  <url>
+    <loc>https://chefstefan.co.za/#services</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#book-a-table</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#contact</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#gallery</loc>
+    <lastmod>2024-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>
