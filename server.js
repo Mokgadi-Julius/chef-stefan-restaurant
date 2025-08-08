@@ -29,20 +29,33 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // Session configuration with PostgreSQL store
-app.use(session({
-    store: new pgSession({
-        pool: pool,
-        tableName: 'sessions'
-    }),
-    secret: process.env.SESSION_SECRET || 'chef-stefan-admin-secret-key-2024',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000
-    }
-}));
+if (pool) {
+    app.use(session({
+        store: new pgSession({
+            pool: pool,
+            tableName: 'sessions'
+        }),
+        secret: process.env.SESSION_SECRET || 'chef-stefan-admin-secret-key-2024',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true,
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        }
+    }));
+} else {
+    app.use(session({
+        secret: process.env.SESSION_SECRET || 'chef-stefan-admin-secret-key-2024',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: false,
+            httpOnly: true,
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        }
+    }));
+}
 
 // Serve static files
 app.use(express.static('public'));
@@ -62,24 +75,70 @@ fs.ensureDirSync(galleryDir);
 // Initialize database
 initializeDatabase().catch(console.error);
 
+// Image processing function
+async function processImage(inputPath, outputPath, width = 800, height = 600, quality = 85) {
+    try {
+        await sharp(inputPath)
+            .resize(width, height, { fit: 'cover' })
+            .jpeg({ quality })
+            .toFile(outputPath);
+        
+        // Remove original file
+        await fs.unlink(inputPath);
+    } catch (err) {
+        console.error('Error processing image:', err);
+        throw err;
+    }
+}
+
 // Insert default data
 async function insertDefaultData() {
+    if (!pool) return;
+    
     try {
         // Check if categories exist
         const existingCategories = await query('SELECT COUNT(*) as count FROM categories');
         
         if (existingCategories.rows[0].count === '0') {
             const defaultCategories = [
-                ['appetizers', 'Appetizers'],
-                ['mains', 'Main Courses'],
-                ['desserts', 'Desserts'],
-                ['beverages', 'Beverages']
+                {
+                    id: 'appetizers',
+                    name: 'Appetizers',
+                    description: 'Start your meal with our delicious appetizers',
+                    color: '#e74c3c',
+                    icon: 'fas fa-leaf',
+                    display_order: 1
+                },
+                {
+                    id: 'mains',
+                    name: 'Main Courses',
+                    description: 'Our signature main dishes',
+                    color: '#f39c12',
+                    icon: 'fas fa-utensils',
+                    display_order: 2
+                },
+                {
+                    id: 'desserts',
+                    name: 'Desserts',
+                    description: 'Sweet endings to your meal',
+                    color: '#9b59b6',
+                    icon: 'fas fa-ice-cream',
+                    display_order: 3
+                },
+                {
+                    id: 'beverages',
+                    name: 'Beverages',
+                    description: 'Refreshing drinks and beverages',
+                    color: '#3498db',
+                    icon: 'fas fa-glass-martini-alt',
+                    display_order: 4
+                }
             ];
 
-            for (const [id, name] of defaultCategories) {
+            for (const category of defaultCategories) {
                 await query(
-                    'INSERT INTO categories (name) VALUES ($1)',
-                    [name]
+                    'INSERT INTO categories (id, name, description, color, icon, display_order) VALUES ($1, $2, $3, $4, $5, $6)',
+                    [category.id, category.name, category.description, category.color, category.icon, category.display_order]
                 );
             }
             console.log('Default categories inserted');
@@ -90,20 +149,23 @@ async function insertDefaultData() {
 }
 
 // Initialize default data
-setTimeout(insertDefaultData, 1000);
+setTimeout(() => {
+    if (pool) insertDefaultData();
+}, 1000);
 
 // Authentication middleware
 function requireAuth(req, res, next) {
     if (req.session && req.session.user) {
         return next();
     }
-    return res.status(401).json({ success: false, message: 'Authentication required' });
+    return res.status(401).json({ error: 'Authentication required' });
 }
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const type = req.params.type || req.body.type || 'general';
+        const type = req.path.includes('categories') ? 'categories' : 
+                     req.path.includes('menu') ? 'menu' : 'gallery';
         let uploadPath = uploadsDir;
         
         switch (type) {
@@ -116,15 +178,13 @@ const storage = multer.diskStorage({
             case 'gallery':
                 uploadPath = galleryDir;
                 break;
-            default:
-                uploadPath = uploadsDir;
         }
         
         cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = uuidv4();
-        cb(null, 'processed_' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
 
@@ -143,33 +203,33 @@ const upload = multer({
 // Routes
 
 // Authentication routes
-app.post('/api/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         
         if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Email and password are required' });
+            return res.status(400).json({ error: 'Email and password are required' });
         }
 
         const result = await query(
-            'SELECT * FROM users WHERE email = $1',
+            'SELECT * FROM users WHERE email = $1 AND is_active = true',
             [email]
         );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const user = result.rows[0];
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
         if (!isValidPassword) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         // Update last login
         await query(
-            'UPDATE users SET created_at = CURRENT_TIMESTAMP WHERE id = $1',
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
             [user.id]
         );
 
@@ -182,75 +242,78 @@ app.post('/api/login', async (req, res) => {
         };
 
         res.json({ 
-            success: true, 
             message: 'Login successful',
             user: req.session.user
         });
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-app.post('/api/logout', (req, res) => {
+app.post('/api/auth/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-            return res.status(500).json({ success: false, message: 'Could not log out' });
+            return res.status(500).json({ error: 'Could not log out' });
         }
-        res.json({ success: true, message: 'Logged out successfully' });
+        res.json({ message: 'Logged out successfully' });
     });
 });
 
-app.get('/api/auth/status', (req, res) => {
-    if (req.session && req.session.user) {
-        res.json({ authenticated: true, user: req.session.user });
-    } else {
-        res.json({ authenticated: false });
-    }
+app.get('/api/auth/me', requireAuth, (req, res) => {
+    res.json({ user: req.session.user });
 });
 
 // Category routes
 app.get('/api/categories', async (req, res) => {
     try {
-        const result = await query('SELECT * FROM categories ORDER BY created_at');
-        res.json({ success: true, categories: result.rows });
+        const result = await query('SELECT * FROM categories ORDER BY display_order, created_at');
+        res.json(result.rows);
     } catch (err) {
         console.error('Error fetching categories:', err);
-        res.status(500).json({ success: false, message: 'Error fetching categories' });
+        res.status(500).json({ error: 'Error fetching categories' });
     }
 });
 
-app.post('/api/categories', requireAuth, upload.single('image'), async (req, res) => {
-    try {
-        const { name } = req.body;
-        
-        if (!name) {
-            return res.status(400).json({ success: false, message: 'Category name is required' });
-        }
+app.post('/api/categories', requireAuth, (req, res) => {
+    const { name, description, color, icon } = req.body;
+    const id = uuidv4();
+    
+    if (!name) {
+        return res.status(400).json({ error: 'Category name is required' });
+    }
 
-        let imagePath = null;
-        if (req.file) {
-            // Process image with Sharp
-            const processedImagePath = path.join(categoriesDir, `processed_${uuidv4()}.jpeg`);
-            await sharp(req.file.path)
-                .resize(400, 300, { fit: 'cover' })
-                .jpeg({ quality: 80 })
-                .toFile(processedImagePath);
-            
-            // Remove original file
-            await fs.unlink(req.file.path);
-            imagePath = path.relative('public', processedImagePath);
-        }
-
-        const result = await query(
-            'INSERT INTO categories (name, image) VALUES ($1, $2) RETURNING *',
-            [name, imagePath]
-        );
-
-        res.json({ success: true, category: result.rows[0] });
-    } catch (err) {
+    query(
+        'INSERT INTO categories (id, name, description, color, icon) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [id, name, description || null, color || '#3498db', icon || 'fas fa-utensils']
+    )
+    .then(result => {
+        res.json(result.rows[0]);
+    })
+    .catch(err => {
         console.error('Error creating category:', err);
-        res.status(500).json({ success: false, message: 'Error creating category' });
+        res.status(500).json({ error: 'Error creating category' });
+    });
+});
+
+app.put('/api/categories/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, color, icon } = req.body;
+        
+        const result = await query(
+            'UPDATE categories SET name = $1, description = $2, color = $3, icon = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *',
+            [name, description, color, icon, id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating category:', err);
+        res.status(500).json({ error: 'Error updating category' });
     }
 });
 
@@ -261,118 +324,171 @@ app.delete('/api/categories/:id', requireAuth, async (req, res) => {
         const result = await query('DELETE FROM categories WHERE id = $1 RETURNING *', [id]);
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Category not found' });
+            return res.status(404).json({ error: 'Category not found' });
         }
 
-        res.json({ success: true, message: 'Category deleted successfully' });
+        res.json({ message: 'Category deleted successfully' });
     } catch (err) {
         console.error('Error deleting category:', err);
-        res.status(500).json({ success: false, message: 'Error deleting category' });
+        res.status(500).json({ error: 'Error deleting category' });
     }
 });
 
 // Menu item routes
-app.get('/api/menu', async (req, res) => {
+app.get('/api/menu-items', async (req, res) => {
     try {
         const result = await query(`
-            SELECT m.*, c.name as category_name 
+            SELECT m.*, c.name as category_name, c.color as category_color 
             FROM menu_items m 
             LEFT JOIN categories c ON m.category_id = c.id 
             ORDER BY m.created_at DESC
         `);
-        res.json({ success: true, menuItems: result.rows });
+        res.json(result.rows);
     } catch (err) {
         console.error('Error fetching menu items:', err);
-        res.status(500).json({ success: false, message: 'Error fetching menu items' });
+        res.status(500).json({ error: 'Error fetching menu items' });
     }
 });
 
-app.post('/api/menu', requireAuth, upload.single('image'), async (req, res) => {
+app.post('/api/menu-items', requireAuth, upload.single('image'), async (req, res) => {
     try {
-        const { name, description, price, category_id, is_available } = req.body;
-        
-        if (!name || !price) {
-            return res.status(400).json({ success: false, message: 'Name and price are required' });
-        }
-
+        const { name, description, price, category_id, available, featured } = req.body;
+        const id = uuidv4();
         let imagePath = null;
+        
         if (req.file) {
-            const processedImagePath = path.join(menuDir, `processed_${uuidv4()}.jpeg`);
-            await sharp(req.file.path)
-                .resize(600, 400, { fit: 'cover' })
-                .jpeg({ quality: 85 })
-                .toFile(processedImagePath);
-            
-            await fs.unlink(req.file.path);
-            imagePath = path.relative('public', processedImagePath);
+            const processedPath = path.join(menuDir, `processed_${req.file.filename}`);
+            await processImage(req.file.path, processedPath, 600, 400, 85);
+            imagePath = `/uploads/menu/processed_${req.file.filename}`;
         }
 
         const result = await query(
-            'INSERT INTO menu_items (name, description, price, category_id, image, is_available) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [name, description || null, parseFloat(price), category_id || null, imagePath, is_available !== 'false']
+            'INSERT INTO menu_items (id, name, description, price, category_id, image_path, available, featured) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [id, name, description || null, parseFloat(price), category_id || null, imagePath, available !== 'false', featured === 'true']
         );
 
-        res.json({ success: true, menuItem: result.rows[0] });
+        res.json(result.rows[0]);
     } catch (err) {
         console.error('Error creating menu item:', err);
-        res.status(500).json({ success: false, message: 'Error creating menu item' });
+        res.status(500).json({ error: 'Error creating menu item' });
     }
 });
 
-app.delete('/api/menu/:id', requireAuth, async (req, res) => {
+app.put('/api/menu-items/:id', requireAuth, upload.single('image'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, price, category_id, available, featured } = req.body;
+        let imagePath = undefined;
+        
+        if (req.file) {
+            const processedPath = path.join(menuDir, `processed_${req.file.filename}`);
+            await processImage(req.file.path, processedPath, 600, 400, 85);
+            imagePath = `/uploads/menu/processed_${req.file.filename}`;
+        }
+
+        let updateQuery = 'UPDATE menu_items SET name = $1, description = $2, price = $3, category_id = $4, available = $5, featured = $6, updated_at = CURRENT_TIMESTAMP';
+        let params = [name, description, parseFloat(price), category_id, available !== 'false', featured === 'true'];
+        
+        if (imagePath) {
+            updateQuery += ', image_path = $7';
+            params.push(imagePath);
+        }
+        
+        updateQuery += ' WHERE id = $' + (params.length + 1) + ' RETURNING *';
+        params.push(id);
+
+        const result = await query(updateQuery, params);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Menu item not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating menu item:', err);
+        res.status(500).json({ error: 'Error updating menu item' });
+    }
+});
+
+app.delete('/api/menu-items/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         
         const result = await query('DELETE FROM menu_items WHERE id = $1 RETURNING *', [id]);
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Menu item not found' });
+            return res.status(404).json({ error: 'Menu item not found' });
         }
 
-        res.json({ success: true, message: 'Menu item deleted successfully' });
+        res.json({ message: 'Menu item deleted successfully' });
     } catch (err) {
         console.error('Error deleting menu item:', err);
-        res.status(500).json({ success: false, message: 'Error deleting menu item' });
+        res.status(500).json({ error: 'Error deleting menu item' });
     }
 });
 
 // Gallery routes
 app.get('/api/gallery', async (req, res) => {
     try {
-        const result = await query('SELECT * FROM gallery_items ORDER BY created_at DESC');
-        res.json({ success: true, images: result.rows });
+        const result = await query('SELECT * FROM gallery_images ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (err) {
         console.error('Error fetching gallery:', err);
-        res.status(500).json({ success: false, message: 'Error fetching gallery' });
+        res.status(500).json({ error: 'Error fetching gallery' });
     }
 });
 
-app.post('/api/gallery', requireAuth, upload.single('image'), async (req, res) => {
+app.post('/api/gallery', requireAuth, upload.array('images', 10), async (req, res) => {
     try {
-        const { title } = req.body;
+        const { titles } = req.body;
+        const processedImages = [];
         
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Image is required' });
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'At least one image is required' });
         }
 
-        const processedImagePath = path.join(galleryDir, `processed_${uuidv4()}.jpeg`);
-        await sharp(req.file.path)
-            .resize(800, 600, { fit: 'cover' })
-            .jpeg({ quality: 90 })
-            .toFile(processedImagePath);
-        
-        await fs.unlink(req.file.path);
-        const imagePath = path.relative('public', processedImagePath);
+        for (let i = 0; i < req.files.length; i++) {
+            const file = req.files[i];
+            const title = Array.isArray(titles) ? titles[i] : `Gallery Image ${i + 1}`;
+            const id = uuidv4();
+            
+            const processedPath = path.join(galleryDir, `processed_${file.filename}`);
+            await processImage(file.path, processedPath, 800, 600, 90);
+            const imagePath = `/uploads/gallery/processed_${file.filename}`;
 
-        const result = await query(
-            'INSERT INTO gallery_items (title, image) VALUES ($1, $2) RETURNING *',
-            [title || 'Untitled', imagePath]
-        );
+            const result = await query(
+                'INSERT INTO gallery_images (id, title, image_path, type) VALUES ($1, $2, $3, $4) RETURNING *',
+                [id, title, imagePath, 'food']
+            );
 
-        res.json({ success: true, image: result.rows[0] });
+            processedImages.push(result.rows[0]);
+        }
+
+        res.json(processedImages);
     } catch (err) {
-        console.error('Error uploading image:', err);
-        res.status(500).json({ success: false, message: 'Error uploading image' });
+        console.error('Error uploading images:', err);
+        res.status(500).json({ error: 'Error uploading images' });
+    }
+});
+
+app.put('/api/gallery/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description } = req.body;
+        
+        const result = await query(
+            'UPDATE gallery_images SET title = $1, description = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *',
+            [title, description, id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Gallery image not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating gallery image:', err);
+        res.status(500).json({ error: 'Error updating gallery image' });
     }
 });
 
@@ -380,34 +496,240 @@ app.delete('/api/gallery/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         
-        const result = await query('DELETE FROM gallery_items WHERE id = $1 RETURNING *', [id]);
+        const result = await query('DELETE FROM gallery_images WHERE id = $1 RETURNING *', [id]);
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Image not found' });
+            return res.status(404).json({ error: 'Gallery image not found' });
         }
 
-        res.json({ success: true, message: 'Image deleted successfully' });
+        res.json({ message: 'Gallery image deleted successfully' });
     } catch (err) {
-        console.error('Error deleting image:', err);
-        res.status(500).json({ success: false, message: 'Error deleting image' });
+        console.error('Error deleting gallery image:', err);
+        res.status(500).json({ error: 'Error deleting gallery image' });
+    }
+});
+
+// User management routes
+app.get('/api/users', requireAuth, async (req, res) => {
+    try {
+        const result = await query('SELECT id, first_name, last_name, email, role, is_active, last_login, created_at FROM users ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ error: 'Error fetching users' });
+    }
+});
+
+app.post('/api/users', requireAuth, async (req, res) => {
+    try {
+        const { first_name, last_name, email, password, role } = req.body;
+        
+        if (!first_name || !last_name || !email || !password) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const id = uuidv4();
+
+        const result = await query(
+            'INSERT INTO users (id, first_name, last_name, email, password_hash, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, first_name, last_name, email, role, is_active, created_at',
+            [id, first_name, last_name, email, hashedPassword, role || 'admin']
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        if (err.message.includes('duplicate key') || err.message.includes('UNIQUE constraint')) {
+            return res.status(409).json({ error: 'Email already exists' });
+        }
+        console.error('Error creating user:', err);
+        res.status(500).json({ error: 'Error creating user' });
+    }
+});
+
+app.put('/api/users/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { first_name, last_name, email, role, is_active } = req.body;
+        
+        const result = await query(
+            'UPDATE users SET first_name = $1, last_name = $2, email = $3, role = $4, is_active = $5, updated_at = CURRENT_TIMESTAMP WHERE id = $6 RETURNING id, first_name, last_name, email, role, is_active, created_at',
+            [first_name, last_name, email, role, is_active, id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ error: 'Error updating user' });
+    }
+});
+
+app.delete('/api/users/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const result = await query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Error deleting user' });
+    }
+});
+
+// Stats route
+app.get('/api/stats', requireAuth, async (req, res) => {
+    try {
+        const [categories, menuItems, galleryImages, users, bookings] = await Promise.all([
+            query('SELECT COUNT(*) as count FROM categories'),
+            query('SELECT COUNT(*) as count FROM menu_items'),
+            query('SELECT COUNT(*) as count FROM gallery_images'),
+            query('SELECT COUNT(*) as count FROM users'),
+            query('SELECT COUNT(*) as count FROM bookings')
+        ]);
+
+        res.json({
+            categories: parseInt(categories.rows[0].count),
+            menu_items: parseInt(menuItems.rows[0].count),
+            gallery_images: parseInt(galleryImages.rows[0].count),
+            users: parseInt(users.rows[0].count),
+            bookings: parseInt(bookings.rows[0].count)
+        });
+    } catch (err) {
+        console.error('Error fetching stats:', err);
+        res.status(500).json({ error: 'Error fetching statistics' });
+    }
+});
+
+// Booking routes
+app.post('/api/bookings', async (req, res) => {
+    try {
+        const {
+            customer_name, customer_email, customer_phone, event_type,
+            event_date, event_time, location, meal_type, occasion,
+            dietary_restrictions, food_style, additional_info,
+            selected_dishes, total_amount
+        } = req.body;
+        
+        if (!customer_name || !customer_email || !customer_phone || !event_date) {
+            return res.status(400).json({ error: 'Required fields are missing' });
+        }
+
+        const id = uuidv4();
+
+        const result = await query(
+            `INSERT INTO bookings (
+                id, customer_name, customer_email, customer_phone, event_type,
+                event_date, event_time, location, meal_type, occasion,
+                dietary_restrictions, food_style, additional_info,
+                selected_dishes, total_amount
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
+            [
+                id, customer_name, customer_email, customer_phone, event_type,
+                event_date, event_time, location, meal_type, occasion,
+                dietary_restrictions, food_style, additional_info,
+                selected_dishes, total_amount
+            ]
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating booking:', err);
+        res.status(500).json({ error: 'Error creating booking' });
+    }
+});
+
+app.get('/api/bookings', requireAuth, async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM bookings ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching bookings:', err);
+        res.status(500).json({ error: 'Error fetching bookings' });
+    }
+});
+
+app.get('/api/bookings/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const result = await query('SELECT * FROM bookings WHERE id = $1', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error fetching booking:', err);
+        res.status(500).json({ error: 'Error fetching booking' });
+    }
+});
+
+app.put('/api/bookings/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, total_amount, additional_info } = req.body;
+        
+        const result = await query(
+            'UPDATE bookings SET status = $1, total_amount = $2, additional_info = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
+            [status, total_amount, additional_info, id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating booking:', err);
+        res.status(500).json({ error: 'Error updating booking' });
+    }
+});
+
+app.delete('/api/bookings/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const result = await query('DELETE FROM bookings WHERE id = $1 RETURNING *', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        res.json({ message: 'Booking deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting booking:', err);
+        res.status(500).json({ error: 'Error deleting booking' });
     }
 });
 
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        database: pool ? 'connected' : 'not connected'
+    });
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Server error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
     console.log('Shutting down gracefully...');
-    await pool.end();
+    if (pool) await pool.end();
     process.exit(0);
 });
 
@@ -416,5 +738,7 @@ app.listen(PORT, () => {
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     if (process.env.DATABASE_URL) {
         console.log('Connected to PostgreSQL database');
+    } else {
+        console.log('Running without database connection');
     }
 });

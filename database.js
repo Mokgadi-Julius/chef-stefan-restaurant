@@ -36,61 +36,104 @@ const initializeDatabase = async () => {
     }
     
     try {
+        // Categories table - exact match to SQLite version
+        await query(`
+            CREATE TABLE IF NOT EXISTS categories (
+                id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                color VARCHAR(50) DEFAULT '#3498db',
+                icon VARCHAR(100) DEFAULT 'fas fa-utensils',
+                display_order INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Menu items table - exact match to SQLite version
+        await query(`
+            CREATE TABLE IF NOT EXISTS menu_items (
+                id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                price DECIMAL(10,2) NOT NULL,
+                category_id VARCHAR(255),
+                image_path VARCHAR(500),
+                available BOOLEAN DEFAULT true,
+                featured BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
+            )
+        `);
+
+        // Gallery images table - exact match to SQLite version  
+        await query(`
+            CREATE TABLE IF NOT EXISTS gallery_images (
+                id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                image_path VARCHAR(500) NOT NULL,
+                type VARCHAR(50) DEFAULT 'food',
+                featured BOOLEAN DEFAULT false,
+                file_size INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Users table - exact match to SQLite version
         await query(`
             CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
+                id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
                 first_name VARCHAR(100) NOT NULL,
                 last_name VARCHAR(100) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(50) DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                password_hash VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'admin',
+                is_active BOOLEAN DEFAULT true,
+                last_login TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
+        // Bookings table - exact match to SQLite version
         await query(`
-            CREATE TABLE IF NOT EXISTS categories (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                image VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            CREATE TABLE IF NOT EXISTS bookings (
+                id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                customer_name VARCHAR(255) NOT NULL,
+                customer_email VARCHAR(255) NOT NULL,
+                customer_phone VARCHAR(50) NOT NULL,
+                event_type VARCHAR(100),
+                event_date VARCHAR(50) NOT NULL,
+                event_time VARCHAR(50),
+                location TEXT,
+                meal_type VARCHAR(100),
+                occasion VARCHAR(100),
+                dietary_restrictions TEXT,
+                food_style VARCHAR(100),
+                additional_info TEXT,
+                selected_dishes TEXT,
+                total_amount DECIMAL(10,2),
+                status VARCHAR(50) DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-        await query(`
-            CREATE TABLE IF NOT EXISTS menu_items (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                description TEXT,
-                price DECIMAL(10, 2) NOT NULL,
-                image VARCHAR(255),
-                category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
-                is_available BOOLEAN DEFAULT true,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        await query(`
-            CREATE TABLE IF NOT EXISTS gallery_items (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255),
-                image VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
+        // Sessions table for connect-pg-simple
         await query(`
             CREATE TABLE IF NOT EXISTS sessions (
                 sid VARCHAR NOT NULL COLLATE "default",
                 sess JSON NOT NULL,
                 expire TIMESTAMP(6) NOT NULL
             )
-            WITH (OIDS=FALSE)
-        `);
+        `).catch(() => {}); // Ignore if exists
 
         await query(`
             ALTER TABLE sessions ADD CONSTRAINT sessions_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE
-        `);
+        `).catch(() => {}); // Ignore if constraint exists
 
         await query(`
             CREATE INDEX IF NOT EXISTS IDX_session_expire ON sessions(expire)
@@ -98,7 +141,7 @@ const initializeDatabase = async () => {
 
         console.log('Database tables initialized successfully');
     } catch (err) {
-        if (err.message.includes('already exists')) {
+        if (err.message.includes('already exists') || err.message.includes('relation') && err.message.includes('already exists')) {
             console.log('Database tables already exist');
         } else {
             console.error('Error initializing database:', err);
