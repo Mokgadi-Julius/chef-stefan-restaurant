@@ -9,8 +9,10 @@
     "setup": "node setup.js",
     "migrate": "node migrate.js",
     "create-admin": "node create_admin_user.js",
+    "test-db": "node test-db.js",
     "railway:migrate": "npm run migrate",
-    "railway:create-admin": "npm run create-admin"
+    "railway:create-admin": "npm run create-admin",
+    "railway:test-db": "npm run test-db"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
