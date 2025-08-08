@@ -944,6 +944,169 @@ app.post('/api/book-table', async (req, res) => {
     }
 });
 
+// Catering inquiry endpoint (sends email for catering forms)
+app.post('/api/catering-inquiry', async (req, res) => {
+    try {
+        const { 
+            customer_name, customer_email, customer_phone, event_type,
+            event_date, event_time, location, meal_type, occasion,
+            dietary_restrictions, food_style, additional_info,
+            selected_dishes, total_amount
+        } = req.body;
+
+        // Validation
+        if (!customer_name || !customer_email || !customer_phone || !event_date) {
+            return res.status(400).json({ error: 'Required fields: name, email, phone, and event date' });
+        }
+
+        // Email template for catering inquiry
+        const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #cda45e 0%, #d9ba85 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: #1a1814; margin: 0; font-size: 24px;">New Catering Inquiry</h1>
+                </div>
+                <div style="padding: 30px; background: #ffffff;">
+                    <h2 style="color: #1a1814; border-bottom: 2px solid #cda45e; padding-bottom: 10px;">Client Details</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div>
+                            <strong style="color: #1a1814;">Client Name:</strong><br>
+                            ${customer_name}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Email:</strong><br>
+                            ${customer_email}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Phone:</strong><br>
+                            ${customer_phone}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Event Type:</strong><br>
+                            ${event_type || 'Not specified'}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Event Date:</strong><br>
+                            ${event_date}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Event Time:</strong><br>
+                            ${event_time || 'Not specified'}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Location:</strong><br>
+                            ${location || 'Not specified'}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Meal Type:</strong><br>
+                            ${meal_type || 'Not specified'}
+                        </div>
+                    </div>
+                    
+                    ${occasion ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Special Occasion:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${occasion}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${dietary_restrictions ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Dietary Restrictions:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${dietary_restrictions}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${food_style ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Food Style:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${food_style}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${additional_info ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Additional Information:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${additional_info}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${selected_dishes && Array.isArray(selected_dishes) && selected_dishes.length > 0 ? `
+                        <div style="margin-bottom: 20px;">
+                            <strong style="color: #1a1814;">Selected Menu Items:</strong>
+                            <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #cda45e; margin-top: 10px;">
+                                ${selected_dishes.map(item => `• ${item.dish} (${item.quantity}x) - R${item.totalPrice.toLocaleString()}`).join('<br>')}
+                                ${total_amount ? `<br><strong>Total: R${total_amount.toLocaleString()}</strong>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+                        <strong style="color: #1a1814;">⚡ Action Required:</strong> Please contact ${customer_name} at ${customer_email} or ${customer_phone} to discuss their catering requirements.
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                        <p>This catering inquiry was submitted through the Private Chef Stefan website.</p>
+                        <p>Received on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Send email
+        await emailTransporter.sendMail({
+            from: `"Chef Stefan Catering" <${process.env.SMTP_USER}>`,
+            to: 'info@privatechefstefan.co.za',
+            replyTo: customer_email,
+            subject: `Catering Inquiry - ${customer_name} for ${event_date}`,
+            html: emailHtml
+        });
+
+        // Store in database
+        try {
+            const id = uuidv4();
+            const result = await query(
+                `INSERT INTO bookings (
+                    id, customer_name, customer_email, customer_phone, event_type,
+                    event_date, event_time, location, meal_type, occasion,
+                    dietary_restrictions, food_style, additional_info,
+                    selected_dishes, total_amount, created_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()) RETURNING *`,
+                [
+                    id, customer_name, customer_email, customer_phone, event_type,
+                    event_date, event_time, location, meal_type, occasion,
+                    dietary_restrictions, food_style, additional_info,
+                    selected_dishes ? JSON.stringify(selected_dishes) : null, total_amount
+                ]
+            );
+            
+            res.json({ 
+                success: true, 
+                message: 'Your catering inquiry has been sent successfully! We will contact you shortly to discuss your requirements.',
+                booking: result.rows[0]
+            });
+        } catch (dbError) {
+            console.error('Database error (inquiry still sent via email):', dbError);
+            res.json({ 
+                success: true, 
+                message: 'Your catering inquiry has been sent successfully! We will contact you shortly to discuss your requirements.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error processing catering inquiry:', error);
+        res.status(500).json({ error: 'Failed to process catering inquiry. Please try again later.' });
+    }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Server error:', error);

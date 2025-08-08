@@ -2,8 +2,8 @@ const API_BASE = '/api';
 
 // Handle book a table form
 document.addEventListener('DOMContentLoaded', function() {
-  const bookingForm = document.querySelector('form[action="forms/book-a-table.php"]');
-  if (bookingForm) {
+  const bookingForm = document.querySelector('form[action="#"]');
+  if (bookingForm && bookingForm.querySelector('input[name="event"]')) {
     // Load menu booking data if available
     loadMenuBookingData();
     
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
       };
 
       try {
-        const response = await fetch(`${API_BASE}/bookings`, {
+        const response = await fetch(`${API_BASE}/catering-inquiry`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage('Your catering inquiry was sent. We will contact you shortly to discuss your bespoke menu and confirm details. Thank you!', 'success');
+          showMessage(result.message || 'Your catering inquiry was sent. We will contact you shortly to discuss your bespoke menu and confirm details. Thank you!', 'success');
           
           // Clear menu booking data from session storage
           sessionStorage.removeItem('menuBookingData');
@@ -56,18 +56,18 @@ document.addEventListener('DOMContentLoaded', function() {
           hideMenuSummary();
           
         } else {
-          showMessage(result.error || 'Failed to send booking request', 'error');
+          showMessage(result.error || 'Failed to send catering inquiry', 'error');
         }
       } catch (error) {
         console.error('Error:', error);
-        showMessage('Failed to send booking request. Please try again.', 'error');
+        showMessage('Failed to send catering inquiry. Please try again.', 'error');
       }
     });
   }
 
-  // Handle simple table booking form
-  const tableBookingForm = document.querySelector('form[action="forms/book-a-table.php"]:not([data-menu-booking])');
-  if (tableBookingForm && !tableBookingForm.hasAttribute('data-menu-booking')) {
+  // Handle simple table booking form (if exists)
+  const tableBookingForm = document.querySelector('form[action="#"]:not([data-catering])');
+  if (tableBookingForm && !tableBookingForm.querySelector('input[name="event"]') && !tableBookingForm.hasAttribute('data-catering')) {
     tableBookingForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Handle contact form
-  const contactForm = document.querySelector('form[action="forms/contact.php"]');
-  if (contactForm) {
+  const contactForm = document.querySelector('form[action="#"]');
+  if (contactForm && contactForm.querySelector('input[name="subject"]')) {
     contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
