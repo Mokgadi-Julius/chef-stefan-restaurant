@@ -1,9 +1,9 @@
 const API_BASE = '/api';
 
-// Handle book a table form
+// Handle catering form
 document.addEventListener('DOMContentLoaded', function() {
-  const bookingForm = document.querySelector('form[action="#"]');
-  if (bookingForm && bookingForm.querySelector('input[name="event"]')) {
+  const bookingForm = document.getElementById('catering-form');
+  if (bookingForm) {
     // Load menu booking data if available
     loadMenuBookingData();
     
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage(result.message || 'Your catering inquiry was sent. We will contact you shortly to discuss your bespoke menu and confirm details. Thank you!', 'success');
+          showMessage(result.message || 'Your catering inquiry was sent. We will contact you shortly to discuss your bespoke menu and confirm details. Thank you!', 'success', 'catering-form');
           
           // Clear menu booking data from session storage
           sessionStorage.removeItem('menuBookingData');
@@ -56,61 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
           hideMenuSummary();
           
         } else {
-          showMessage(result.error || 'Failed to send catering inquiry', 'error');
+          showMessage(result.error || 'Failed to send catering inquiry', 'error', 'catering-form');
         }
       } catch (error) {
         console.error('Error:', error);
-        showMessage('Failed to send catering inquiry. Please try again.', 'error');
+        showMessage('Failed to send catering inquiry. Please try again.', 'error', 'catering-form');
       }
     });
   }
 
-  // Handle simple table booking form (if exists)
-  const tableBookingForm = document.querySelector('form[action="#"]:not([data-catering])');
-  if (tableBookingForm && !tableBookingForm.querySelector('input[name="event"]') && !tableBookingForm.hasAttribute('data-catering')) {
-    tableBookingForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const bookingData = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        date: formData.get('date'),
-        time: formData.get('time'),
-        people: formData.get('people'),
-        occasion: formData.get('occasion') || formData.get('message'),
-        dietary_requirements: formData.get('dietary') || formData.get('dietary_requirements'),
-        special_requests: formData.get('requests') || formData.get('special_requests')
-      };
-
-      try {
-        const response = await fetch(`${API_BASE}/book-table`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(bookingData)
-        });
-
-        const result = await response.json();
-        
-        if (response.ok) {
-          showMessage(result.message || 'Your booking request has been sent successfully! We will contact you soon to confirm.', 'success');
-          this.reset();
-        } else {
-          showMessage(result.error || 'Failed to send booking request', 'error');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        showMessage('Failed to send booking request. Please try again.', 'error');
-      }
-    });
-  }
 
   // Handle contact form
-  const contactForm = document.querySelector('form[action="#"]');
-  if (contactForm && contactForm.querySelector('input[name="subject"]')) {
+  const contactForm = document.getElementById('contact-form');
+  if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -134,41 +92,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage(result.message || 'Your message has been sent successfully!', 'success');
+          showMessage(result.message || 'Your message has been sent successfully!', 'success', 'contact-form');
           this.reset();
         } else {
-          showMessage(result.error || 'Failed to send message', 'error');
+          showMessage(result.error || 'Failed to send message', 'error', 'contact-form');
         }
       } catch (error) {
         console.error('Error:', error);
-        showMessage('Failed to send message', 'error');
+        showMessage('Failed to send message', 'error', 'contact-form');
       }
     });
   }
 });
 
 // Show message function
-function showMessage(message, type) {
+function showMessage(message, type, formId = null) {
   // Remove existing messages
-  const existingMessage = document.querySelector('.form-message');
-  if (existingMessage) {
-    existingMessage.remove();
-  }
+  const existingMessages = document.querySelectorAll('.form-message');
+  existingMessages.forEach(msg => msg.remove());
 
   // Create new message element
   const messageDiv = document.createElement('div');
   messageDiv.className = `form-message alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
-  messageDiv.textContent = message;
+  messageDiv.innerHTML = `<strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}`;
+  messageDiv.style.cssText = 'margin: 20px 0; padding: 15px; border-radius: 5px; font-weight: 500;';
   
-  // Insert message before the form
-  const form = document.querySelector('form');
-  if (form) {
-    form.parentNode.insertBefore(messageDiv, form);
+  // Insert message before the specific form or find the active form
+  let targetForm = formId ? document.getElementById(formId) : document.querySelector('form');
+  if (targetForm) {
+    targetForm.parentNode.insertBefore(messageDiv, targetForm);
     
-    // Auto-remove message after 5 seconds
+    // Scroll to message
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Auto-remove message after 6 seconds
     setTimeout(() => {
-      messageDiv.remove();
-    }, 5000);
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 6000);
   }
 }
 
@@ -260,5 +222,5 @@ function hideMenuSummary() {
 function clearMenuBooking() {
   sessionStorage.removeItem('menuBookingData');
   hideMenuSummary();
-  showMessage('Menu selection cleared', 'info');
+  showMessage('Menu selection cleared', 'info', 'catering-form');
 }
