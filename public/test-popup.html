@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup Notifications</title>
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body style="padding: 50px; background: #1a1814;">
+    <h1 style="color: white;">Test Popup Notifications</h1>
+    
+    <button onclick="testSuccess()" style="margin: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Success Popup</button>
+    
+    <button onclick="testError()" style="margin: 10px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Error Popup</button>
+    
+    <button onclick="testInfo()" style="margin: 10px; padding: 10px 20px; background: #cda45e; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Info Popup</button>
+
+    <script src="assets/js/forms.js"></script>
+    <script>
+        function testSuccess() {
+            showPopupNotification(
+                'Success Test!',
+                'This is a test success notification that should slide in from the right.',
+                'success'
+            );
+        }
+        
+        function testError() {
+            showPopupNotification(
+                'Error Test!',
+                'This is a test error notification with red background.',
+                'error'
+            );
+        }
+        
+        function testInfo() {
+            showPopupNotification(
+                'Info Test!',
+                'This is a test info notification with golden background.',
+                'info',
+                3000
+            );
+        }
+    </script>
+</body>
+</html>
