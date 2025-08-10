@@ -1114,6 +1114,158 @@ app.post('/api/catering-inquiry', async (req, res) => {
     }
 });
 
+// Cart booking endpoint (sends email for cart-based bookings)
+app.post('/api/cart-booking', async (req, res) => {
+    try {
+        const { 
+            customer_name, customer_email, customer_phone, event_date,
+            event_time, guest_count, location, special_requests,
+            selected_dishes, total_amount, booking_source
+        } = req.body;
+
+        // Validation
+        if (!customer_name || !customer_email || !customer_phone || !event_date || !event_time || !guest_count) {
+            return res.status(400).json({ error: 'Required fields: name, email, phone, event date, time, and guest count' });
+        }
+
+        // Format selected dishes for email
+        const dishesHtml = selected_dishes && selected_dishes.length > 0 ? 
+            selected_dishes.map(dish => `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>${dish.dish}</strong><br>
+                    <span style="color: #6c757d;">Quantity: ${dish.quantity} × R${dish.price.toLocaleString()}</span><br>
+                    <span style="color: #28a745; font-weight: 600;">Subtotal: R${dish.totalPrice.toLocaleString()}</span>
+                </div>
+            `).join('') : '<p style="color: #6c757d; font-style: italic;">No specific dishes selected - custom menu requested</p>';
+
+        // Email template for cart booking
+        const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #cda45e 0%, #d9ba85 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: #1a1814; margin: 0; font-size: 24px;">New Cart Booking Request</h1>
+                    <p style="color: #1a1814; margin: 10px 0 0; opacity: 0.9;">Premium Private Chef Experience</p>
+                </div>
+                
+                <div style="padding: 30px; background: #ffffff;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div>
+                            <strong style="color: #1a1814;">Customer Name:</strong><br>
+                            ${customer_name}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Email:</strong><br>
+                            ${customer_email}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Phone:</strong><br>
+                            ${customer_phone}
+                        </div>
+                        <div>
+                            <strong style="color: #1a1814;">Guest Count:</strong><br>
+                            ${guest_count} guests
+                        </div>
+                    </div>
+
+                    <hr style="border: none; height: 1px; background: #eee; margin: 30px 0;">
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: #1a1814; margin-bottom: 15px;">Event Details</h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <div style="margin-bottom: 10px;">
+                                <strong style="color: #1a1814;">Date & Time:</strong><br>
+                                ${new Date(event_date).toLocaleDateString('en-ZA', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })} at ${event_time}
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <strong style="color: #1a1814;">Location:</strong><br>
+                                ${location}
+                            </div>
+                            ${special_requests ? `
+                            <div>
+                                <strong style="color: #1a1814;">Special Requests:</strong><br>
+                                ${special_requests}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: #1a1814; margin-bottom: 15px;">Selected Menu Items</h3>
+                        ${dishesHtml}
+                        ${total_amount > 0 ? `
+                        <div style="text-align: right; margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                            <strong style="color: #1a1814; font-size: 18px;">Total Estimated Amount: R${total_amount.toLocaleString()}</strong>
+                            <br>
+                            <small style="color: #6c757d;">*Final pricing subject to menu customization and requirements</small>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+                        <strong style="color: #1a1814;">📞 Contact Private Chef Stefan:</strong><br>
+                        Email: info@privatechefstefan.co.za<br>
+                        Phone: +27 (0) 82 123 4567<br>
+                        <em>We will contact you shortly to discuss your menu and confirm all details!</em>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                        <p>This booking was submitted through the Private Chef Stefan cart system.</p>
+                        <p>Source: ${booking_source || 'cart_session'}</p>
+                        <p>Received on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Send email
+        await emailTransporter.sendMail({
+            from: `"Chef Stefan Cart Booking" <${process.env.SMTP_USER}>`,
+            to: 'juliusmokgadilanga5@gmail.com',
+            replyTo: customer_email,
+            subject: `Cart Booking Request - ${customer_name} for ${event_date} at ${event_time}`,
+            html: emailHtml
+        });
+
+        // Store in database
+        try {
+            const id = uuidv4();
+            const result = await query(
+                `INSERT INTO bookings (
+                    id, customer_name, customer_email, customer_phone, event_type,
+                    event_date, event_time, location, occasion,
+                    additional_info, selected_dishes, total_amount, created_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW()) RETURNING *`,
+                [
+                    id, customer_name, customer_email, customer_phone, 'Cart Booking',
+                    event_date, event_time, location, `${guest_count} guests`,
+                    special_requests || `Cart booking for ${guest_count} guests`,
+                    selected_dishes ? JSON.stringify(selected_dishes) : null, total_amount
+                ]
+            );
+            
+            res.json({ 
+                success: true, 
+                message: 'Your booking request has been sent successfully! We will contact you shortly to confirm your reservation and discuss the final menu details.',
+                booking: result.rows[0]
+            });
+        } catch (dbError) {
+            console.error('Database error (booking still sent via email):', dbError);
+            res.json({ 
+                success: true, 
+                message: 'Your booking request has been sent successfully! We will contact you shortly to confirm your reservation and discuss the final menu details.'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error processing cart booking:', error);
+        res.status(500).json({ error: 'Failed to process booking request. Please try again later.' });
+    }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Server error:', error);

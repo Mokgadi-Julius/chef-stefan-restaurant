@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Your Cart - Private Chef Stefan</title>
+  <meta content="Review your selected menu items and proceed with booking Private Chef Stefan" name="description">
+  <meta content="private chef, cart, booking, catering, Cape Town" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <style>
+    .cart-session-page {
+      background: linear-gradient(135deg, #1a1814 0%, #2c2416 100%);
+      min-height: 100vh;
+      padding: 80px 0 40px;
+    }
+
+    .cart-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .cart-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .cart-header h1 {
+      color: #cda45e;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .cart-header p {
+      color: #aaaaaa;
+      font-size: 1.1rem;
+    }
+
+    .cart-content {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(205, 164, 94, 0.2);
+    }
+
+    .cart-item-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(205, 164, 94, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .cart-item-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(205, 164, 94, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .cart-item-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-item-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+
+    .cart-item-details {
+      color: #aaaaaa;
+      font-size: 0.95rem;
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 5px 15px;
+    }
+
+    .quantity-btn {
+      background: #cda45e;
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .quantity-btn:hover {
+      background: #d4af6a;
+      transform: scale(1.1);
+    }
+
+    .quantity-display {
+      color: #ffffff;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .cart-item-price {
+      text-align: right;
+    }
+
+    .item-price {
+      color: #cda45e;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .item-total {
+      color: #ffffff;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .cart-summary {
+      background: linear-gradient(135deg, #cda45e 0%, #d4af6a 100%);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .cart-total {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1a1814;
+      margin-bottom: 10px;
+    }
+
+    .cart-summary p {
+      color: #1a1814;
+      margin-bottom: 25px;
+      opacity: 0.8;
+    }
+
+    .cart-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-cart-action {
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .btn-book-now {
+      background: #1a1814;
+      color: #cda45e;
+      border-color: #1a1814;
+    }
+
+    .btn-book-now:hover {
+      background: transparent;
+      color: #1a1814;
+      border-color: #1a1814;
+      transform: translateY(-2px);
+    }
+
+    .btn-continue-shopping {
+      background: transparent;
+      color: #1a1814;
+      border-color: #1a1814;
+    }
+
+    .btn-continue-shopping:hover {
+      background: #1a1814;
+      color: #cda45e;
+      transform: translateY(-2px);
+    }
+
+    .btn-clear-cart {
+      background: #dc3545;
+      color: white;
+      border-color: #dc3545;
+    }
+
+    .btn-clear-cart:hover {
+      background: transparent;
+      color: #dc3545;
+      border-color: #dc3545;
+      transform: translateY(-2px);
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .empty-cart-icon {
+      font-size: 4rem;
+      color: #cda45e;
+      margin-bottom: 20px;
+    }
+
+    .empty-cart h3 {
+      color: #ffffff;
+      margin-bottom: 15px;
+    }
+
+    .empty-cart p {
+      color: #aaaaaa;
+      margin-bottom: 30px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .cart-content {
+        padding: 20px;
+      }
+
+      .cart-item-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .cart-item-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .cart-actions {
+        flex-direction: column;
+      }
+
+      .btn-cart-action {
+        width: 100%;
+      }
+    }
+
+    /* Booking Form Styles */
+    .booking-form-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    .booking-form-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #1a1814 0%, #2c2416 100%);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 2px solid #cda45e;
+    }
+
+    .booking-form-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .booking-form-header h2 {
+      color: #cda45e;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .booking-form-header p {
+      color: #aaaaaa;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      color: #cda45e;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(205, 164, 94, 0.3);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #ffffff;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #cda45e;
+      box-shadow: 0 0 0 0.2rem rgba(205, 164, 94, 0.25);
+      color: #ffffff;
+    }
+
+    .form-control::placeholder {
+      color: #aaaaaa;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #cda45e 0%, #d4af6a 100%);
+      color: #1a1814;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 25px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(205, 164, 94, 0.3);
+    }
+
+    .btn-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: #cda45e;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top d-flex align-items-center">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-lg-between">
+
+      <h1 class="logo me-auto me-lg-0"><a href="index.html">Private Chef Stefan</a></h1>
+
+      <nav id="navbar" class="navbar order-last order-lg-0">
+        <ul>
+          <li><a class="nav-link scrollto" href="index.html">Home</a></li>
+          <li><a class="nav-link scrollto" href="menu.html">Menu</a></li>
+          <li><a class="nav-link scrollto active" href="cart.html">Cart</a></li>
+          <li><a class="nav-link scrollto" href="index.html#contact">Contact</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+
+    </div>
+  </header><!-- End Header -->
+
+  <main class="cart-session-page">
+    <div class="container cart-container">
+      
+      <div class="cart-header" data-aos="fade-up">
+        <h1><i class="bi bi-cart-check"></i> Your Cart</h1>
+        <p>Review your selected items and proceed with booking</p>
+      </div>
+
+      <div class="cart-content" data-aos="fade-up" data-aos-delay="100">
+        
+        <!-- Cart Items -->
+        <div id="cartItemsList">
+          <!-- Items will be populated by JavaScript -->
+        </div>
+
+        <!-- Empty Cart State -->
+        <div id="emptyCartState" class="empty-cart" style="display: none;">
+          <div class="empty-cart-icon">
+            <i class="bi bi-cart-x"></i>
+          </div>
+          <h3>Your cart is empty</h3>
+          <p>Browse our delicious menu and add some items to get started!</p>
+          <a href="menu.html" class="btn btn-cart-action btn-continue-shopping">
+            <i class="bi bi-arrow-left"></i> Browse Menu
+          </a>
+        </div>
+
+        <!-- Cart Summary -->
+        <div id="cartSummary" class="cart-summary" style="display: none;">
+          <div class="cart-total">
+            Total: R<span id="cartTotalAmount">0</span>
+          </div>
+          <p><span id="cartTotalItems">0</span> items selected for your perfect dining experience</p>
+          
+          <div class="cart-actions">
+            <button class="btn btn-cart-action btn-book-now" id="bookNowBtn">
+              <i class="bi bi-calendar-check"></i> Book Now
+            </button>
+            <a href="menu.html" class="btn btn-cart-action btn-continue-shopping">
+              <i class="bi bi-plus-circle"></i> Add More Items
+            </a>
+            <button class="btn btn-cart-action btn-clear-cart" id="clearCartBtn">
+              <i class="bi bi-trash"></i> Clear Cart
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Booking Form Modal -->
+  <div id="bookingFormModal" class="booking-form-modal">
+    <div class="booking-form-container">
+      <button class="btn-close" id="closeBookingForm">&times;</button>
+      
+      <div class="booking-form-header">
+        <h2><i class="bi bi-calendar-heart"></i> Complete Your Booking</h2>
+        <p>Let's create your perfect dining experience</p>
+      </div>
+
+      <form id="cartBookingForm">
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label for="customerName">Full Name *</label>
+            <input type="text" class="form-control" id="customerName" name="customerName" placeholder="Enter your full name" required>
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="customerEmail">Email Address *</label>
+            <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="your@email.com" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label for="customerPhone">Phone Number *</label>
+            <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="+27 12 345 6789" required>
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="eventDate">Event Date *</label>
+            <input type="date" class="form-control" id="eventDate" name="eventDate" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label for="eventTime">Preferred Time *</label>
+            <select class="form-control" id="eventTime" name="eventTime" required>
+              <option value="">Select Time</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="13:00">1:00 PM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="18:00">6:00 PM</option>
+              <option value="19:00">7:00 PM</option>
+              <option value="20:00">8:00 PM</option>
+            </select>
+          </div>
+          <div class="col-md-6 form-group">
+            <label for="guestCount">Number of Guests *</label>
+            <input type="number" class="form-control" id="guestCount" name="guestCount" placeholder="2" min="1" max="50" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="eventLocation">Event Location *</label>
+          <input type="text" class="form-control" id="eventLocation" name="eventLocation" placeholder="Full address or venue name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="specialRequests">Special Requests & Dietary Requirements</label>
+          <textarea class="form-control" id="specialRequests" name="specialRequests" rows="4" placeholder="Any allergies, dietary requirements, or special requests..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-submit">
+          <i class="bi bi-send"></i> Send Booking Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+
+  <!-- Main JS -->
+  <script src="assets/js/main.js"></script>
+  
+  <!-- Cart Session JS -->
+  <script src="assets/js/cart-session.js?v=1.0.1"></script>
+
+</body>
+
+</html>

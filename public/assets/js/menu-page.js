@@ -263,29 +263,22 @@ class MenuPage {
             return;
         }
         
-        // Show booking form modal or redirect to booking page
-        const continueBooking = confirm(
-            `You have selected ${this.selectedItems.length} items for a total of R${this.totalAmount.toLocaleString()}.\n\nWould you like to proceed with the booking form?`
-        );
+        // Prepare booking data
+        const bookingData = {
+            items: this.selectedItems,
+            totalAmount: this.totalAmount,
+            timestamp: new Date().toISOString(),
+            source: 'menu'
+        };
         
-        if (continueBooking) {
-            // Prepare booking data
-            const bookingData = {
-                items: this.selectedItems,
-                totalAmount: this.totalAmount,
-                timestamp: new Date().toISOString(),
-                source: 'menu'
-            };
-            
-            // Store in session storage for the booking form
-            sessionStorage.setItem('menuBookingData', JSON.stringify(bookingData));
-            
-            // Redirect to booking form
-            window.location.href = 'index.html#book-a-table';
-            
-            // Show success message
-            this.showNotification('Redirecting to booking form...', 'success');
-        }
+        // Store in session storage for the cart session
+        sessionStorage.setItem('menuBookingData', JSON.stringify(bookingData));
+        
+        // Redirect to cart session page
+        window.location.href = 'cart.html';
+        
+        // Show success message
+        this.showNotification('Taking you to your cart...', 'success');
     }
 
     showNotification(message, type = 'success') {
