@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Management - Chef Stefan Admin</title>
+    <meta content="Admin blog management for Chef Stefan's culinary blog" name="description">
+    
+    <!-- Favicons -->
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    
+    <!-- Quill Editor for Rich Text -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link href="assets/css/style.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #cda45e;
+            --secondary-color: #d9ba85;
+            --dark-color: #1a1814;
+            --light-dark: #252525;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --border-color: rgba(205, 164, 94, 0.3);
+            --sidebar-width: 280px;
+            --header-height: 70px;
+        }
+
+        body {
+            font-family: "Open Sans", sans-serif;
+            background: #f8f9fa;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .admin-header {
+            background: linear-gradient(135deg, var(--dark-color) 0%, var(--light-dark) 100%);
+            color: white;
+            height: var(--header-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .admin-header .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            z-index: 1020;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        /* Cards */
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .admin-card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 25px;
+            border-bottom: none;
+        }
+
+        .admin-card-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .admin-card-body {
+            padding: 25px;
+        }
+
+        /* Buttons */
+        .btn-admin {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(205, 164, 94, 0.3);
+            color: white;
+        }
+
+        .btn-outline-admin {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline-admin:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Table Styles */
+        .table-admin {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .table-admin thead {
+            background: linear-gradient(135deg, var(--dark-color), var(--light-dark));
+            color: white;
+        }
+
+        .table-admin th {
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table-admin td {
+            padding: 15px;
+            border-color: #f1f1f1;
+            vertical-align: middle;
+        }
+
+        .table-admin tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-published {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-archived {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Category Colors */
+        .category-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* Form Styles */
+        .form-control-admin {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-admin:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(205, 164, 94, 0.25);
+        }
+
+        .form-label-admin {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        /* Modal Styles */
+        .modal-header-admin {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Quill Editor Customization */
+        .ql-toolbar.ql-snow {
+            border-top: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .ql-container.ql-snow {
+            border-bottom: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .admin-header h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #138496;
+            transform: scale(1.1);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .btn-view {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #218838;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <button class="btn btn-link text-white d-md-none" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h1><i class="bi bi-journal-text"></i> Blog Management</h1>
+        <div class="user-info">
+            <span id="adminName">Loading...</span>
+            <a href="/" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-house"></i> View Site
+            </a>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="admin-sidebar" id="sidebar">
+        <ul class="sidebar-nav">
+            <li>
+                <a href="admin-dashboard.html">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="admin-categories.html">
+                    <i class="bi bi-tags"></i>
+                    Categories
+                </a>
+            </li>
+            <li>
+                <a href="admin-menu.html">
+                    <i class="bi bi-card-list"></i>
+                    Menu Items
+                </a>
+            </li>
+            <li>
+                <a href="admin-gallery.html">
+                    <i class="bi bi-images"></i>
+                    Gallery
+                </a>
+            </li>
+            <li>
+                <a href="admin-blog.html" class="active">
+                    <i class="bi bi-journal-text"></i>
+                    Blog Posts
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="viewBookings()">
+                    <i class="bi bi-calendar-check"></i>
+                    Bookings
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">Blog Posts</h2>
+                <p class="text-muted mb-0">Manage your culinary blog content</p>
+            </div>
+            <div>
+                <button class="btn btn-admin" onclick="showCreatePostModal()">
+                    <i class="bi bi-plus-circle"></i> New Post
+                </button>
+                <button class="btn btn-outline-admin ms-2" onclick="manageCategoriesModal()">
+                    <i class="bi bi-tags"></i> Categories
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="admin-card">
+            <div class="admin-card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <select class="form-select form-control-admin" id="statusFilter" onchange="applyFilters()">
+                            <option value="">All Status</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-control-admin" id="categoryFilter" onchange="applyFilters()">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control form-control-admin" id="searchInput" placeholder="Search posts..." onkeyup="handleSearch(event)">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-admin w-100" onclick="clearFilters()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Table -->
+        <div class="admin-card">
+            <div class="admin-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-admin table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Views</th>
+                                <th>Published</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div id="paginationInfo" class="text-muted"></div>
+            <nav id="paginationNav"></nav>
+        </div>
+    </main>
+
+    <!-- Create/Edit Post Modal -->
+    <div class="modal fade" id="postModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header modal-header-admin">
+                    <h5 class="modal-title" id="postModalTitle">Create New Post</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="postForm">
+                        <input type="hidden" id="postId">
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label form-label-admin">Title *</label>
+                                    <input type="text" class="form-control form-control-admin" id="postTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label form-label-admin">Status</label>
+                                    <select class="form-select form-control-admin" id="postStatus">
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label form-label-admin">Category</label>
+                                    <select class="form-select form-control-admin" id="postCategory">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label form-label-admin">Featured Image URL</label>
+                                    <input type="url" class="form-control form-control-admin" id="featuredImage" placeholder="https://example.com/image.jpg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label form-label-admin">Excerpt</label>
+                            <textarea class="form-control form-control-admin" id="postExcerpt" rows="3" placeholder="Brief description of the post..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label form-label-admin">Content *</label>
+                            <div id="postContent" style="height: 300px;"></div>
+                        </div>
+
+                        <!-- SEO Section -->
+                        <div class="border-top pt-3">
+                            <h6 class="mb-3">SEO Optimization</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-admin">SEO Title</label>
+                                        <input type="text" class="form-control form-control-admin" id="seoTitle" maxlength="60">
+                                        <small class="form-text text-muted">Recommended: 50-60 characters</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-admin">Tags</label>
+                                        <input type="text" class="form-control form-control-admin" id="postTags" placeholder="recipe, cooking, tips (comma separated)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label form-label-admin">SEO Description</label>
+                                <textarea class="form-control form-control-admin" id="seoDescription" rows="2" maxlength="160"></textarea>
+                                <small class="form-text text-muted">Recommended: 150-160 characters</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="savePost()">
+                        <i class="bi bi-save"></i> Save Post
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Modal -->
+    <div class="modal fade" id="categoriesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-admin">
+                    <h5 class="modal-title">Manage Categories</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Add New Category</h6>
+                            <form id="categoryForm">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control form-control-admin" id="categoryName" placeholder="Category Name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control form-control-admin" id="categoryDescription" rows="2" placeholder="Description (optional)"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label form-label-admin">Color</label>
+                                    <input type="color" class="form-control form-control-color" id="categoryColor" value="#cda45e">
+                                </div>
+                                <button type="button" class="btn btn-admin w-100" onclick="saveCategory()">
+                                    Add Category
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-8">
+                            <h6>Existing Categories</h6>
+                            <div id="categoriesList">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="assets/js/authentication.js"></script>
+    
+    <script>
+        let currentPage = 1;
+        let currentFilters = {};
+        let quillEditor;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+            initializeQuillEditor();
+            loadCategories();
+            loadBlogPosts();
+            
+            // Initialize AOS
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    easing: 'slide',
+                    once: true
+                });
+            }
+        });
+
+        // Initialize Quill Editor
+        function initializeQuillEditor() {
+            quillEditor = new Quill('#postContent', {
+                theme: 'snow',
+                placeholder: 'Write your blog post content here...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+
+        // Load Categories
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/blog/categories');
+                const categories = await response.json();
+                
+                // Update category filters
+                const categoryFilter = document.getElementById('categoryFilter');
+                const postCategory = document.getElementById('postCategory');
+                
+                categoryFilter.innerHTML = '<option value="">All Categories</option>';
+                postCategory.innerHTML = '<option value="">Select Category</option>';
+                
+                categories.forEach(category => {
+                    const option1 = new Option(category.name, category.id);
+                    const option2 = new Option(category.name, category.id);
+                    categoryFilter.appendChild(option1);
+                    postCategory.appendChild(option2);
+                });
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        // Load Blog Posts
+        async function loadBlogPosts() {
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: 10,
+                    ...currentFilters
+                });
+                
+                const response = await fetch(`/api/admin/blog/posts?${params}`);
+                const data = await response.json();
+                
+                renderPostsTable(data.posts);
+                renderPagination(data.pagination);
+                
+            } catch (error) {
+                console.error('Error loading blog posts:', error);
+                document.getElementById('postsTableBody').innerHTML = 
+                    '<tr><td colspan="6" class="text-center text-danger">Error loading posts</td></tr>';
+            }
+        }
+
+        // Render Posts Table
+        function renderPostsTable(posts) {
+            const tbody = document.getElementById('postsTableBody');
+            
+            if (posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No posts found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = posts.map(post => `
+                <tr>
+                    <td>
+                        <div>
+                            <h6 class="mb-1">${escapeHtml(post.title)}</h6>
+                            <small class="text-muted">${post.excerpt ? escapeHtml(post.excerpt.substring(0, 50)) + '...' : 'No excerpt'}</small>
+                        </div>
+                    </td>
+                    <td>
+                        ${post.category_name ? `
+                            <span class="category-dot" style="background-color: ${post.category_color || '#cda45e'}"></span>
+                            ${escapeHtml(post.category_name)}
+                        ` : '<em class="text-muted">Uncategorized</em>'}
+                    </td>
+                    <td>
+                        <span class="status-badge status-${post.status}">${post.status}</span>
+                    </td>
+                    <td>
+                        <i class="bi bi-eye"></i> ${post.view_count || 0}
+                    </td>
+                    <td>
+                        ${post.published_at ? new Date(post.published_at).toLocaleDateString() : '<em>Not published</em>'}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${post.status === 'published' ? `
+                                <button class="btn btn-action btn-view" onclick="viewPost('${post.slug}')" title="View Post">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-action btn-edit" onclick="editPost('${post.id}')" title="Edit Post">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-action btn-delete" onclick="deletePost('${post.id}', '${escapeHtml(post.title)}')" title="Delete Post">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Pagination
+        function renderPagination(pagination) {
+            const info = document.getElementById('paginationInfo');
+            const nav = document.getElementById('paginationNav');
+            
+            if (!pagination || pagination.totalPosts === 0) {
+                info.innerHTML = '';
+                nav.innerHTML = '';
+                return;
+            }
+            
+            info.innerHTML = `Showing ${((pagination.currentPage - 1) * 10) + 1} to ${Math.min(pagination.currentPage * 10, pagination.totalPosts)} of ${pagination.totalPosts} posts`;
+            
+            if (pagination.totalPages <= 1) {
+                nav.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '<nav><ul class="pagination justify-content-end mb-0">';
+            
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${!pagination.hasPrevPage ? 'disabled' : ''}">
+                    <button class="page-link" onclick="changePage(${pagination.currentPage - 1})" ${!pagination.hasPrevPage ? 'disabled' : ''}>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </li>
+            `;
+            
+            // Page numbers
+            const startPage = Math.max(1, pagination.currentPage - 2);
+            const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                        <button class="page-link" onclick="changePage(${i})">${i}</button>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${!pagination.hasNextPage ? 'disabled' : ''}">
+                    <button class="page-link" onclick="changePage(${pagination.currentPage + 1})" ${!pagination.hasNextPage ? 'disabled' : ''}>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </li>
+            `;
+            
+            paginationHTML += '</ul></nav>';
+            nav.innerHTML = paginationHTML;
+        }
+
+        // Page change
+        function changePage(page) {
+            currentPage = page;
+            loadBlogPosts();
+        }
+
+        // Apply Filters
+        function applyFilters() {
+            currentFilters = {};
+            
+            const status = document.getElementById('statusFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            
+            if (status) currentFilters.status = status;
+            if (category) currentFilters.category = category;
+            if (search) currentFilters.search = search;
+            
+            currentPage = 1;
+            loadBlogPosts();
+        }
+
+        // Clear Filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            currentFilters = {};
+            currentPage = 1;
+            loadBlogPosts();
+        }
+
+        // Handle Search
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                applyFilters();
+            }
+        }
+
+        // Show Create Post Modal
+        function showCreatePostModal() {
+            document.getElementById('postModalTitle').textContent = 'Create New Post';
+            document.getElementById('postForm').reset();
+            document.getElementById('postId').value = '';
+            quillEditor.setContents([]);
+            
+            const modal = new bootstrap.Modal(document.getElementById('postModal'));
+            modal.show();
+        }
+
+        // Edit Post
+        async function editPost(postId) {
+            try {
+                const response = await fetch(`/api/admin/blog/posts/${postId}`);
+                const post = await response.json();
+                
+                document.getElementById('postModalTitle').textContent = 'Edit Post';
+                document.getElementById('postId').value = post.id;
+                document.getElementById('postTitle').value = post.title;
+                document.getElementById('postStatus').value = post.status;
+                document.getElementById('postCategory').value = post.category_id || '';
+                document.getElementById('featuredImage').value = post.featured_image || '';
+                document.getElementById('postExcerpt').value = post.excerpt || '';
+                document.getElementById('seoTitle').value = post.seo_title || '';
+                document.getElementById('seoDescription').value = post.seo_description || '';
+                document.getElementById('postTags').value = Array.isArray(post.tags) ? post.tags.join(', ') : (post.tags || '');
+                
+                // Set Quill content
+                quillEditor.root.innerHTML = post.content || '';
+                
+                const modal = new bootstrap.Modal(document.getElementById('postModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('Error loading post:', error);
+                alert('Error loading post for editing');
+            }
+        }
+
+        // Save Post
+        async function savePost() {
+            try {
+                const postId = document.getElementById('postId').value;
+                const isEdit = !!postId;
+                
+                const formData = {
+                    title: document.getElementById('postTitle').value,
+                    content: quillEditor.root.innerHTML,
+                    excerpt: document.getElementById('postExcerpt').value,
+                    category_id: document.getElementById('postCategory').value || null,
+                    status: document.getElementById('postStatus').value,
+                    featured_image: document.getElementById('featuredImage').value || null,
+                    seo_title: document.getElementById('seoTitle').value || null,
+                    seo_description: document.getElementById('seoDescription').value || null,
+                    tags: document.getElementById('postTags').value.split(',').map(tag => tag.trim()).filter(tag => tag)
+                };
+                
+                const url = isEdit ? `/api/admin/blog/posts/${postId}` : '/api/admin/blog/posts';
+                const method = isEdit ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Post ${isEdit ? 'updated' : 'created'} successfully!`);
+                    bootstrap.Modal.getInstance(document.getElementById('postModal')).hide();
+                    loadBlogPosts();
+                } else {
+                    alert(result.error || `Failed to ${isEdit ? 'update' : 'create'} post`);
+                }
+                
+            } catch (error) {
+                console.error('Error saving post:', error);
+                alert('Error saving post');
+            }
+        }
+
+        // Delete Post
+        async function deletePost(postId, title) {
+            if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/blog/posts/${postId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Post deleted successfully!');
+                    loadBlogPosts();
+                } else {
+                    alert(result.error || 'Failed to delete post');
+                }
+                
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                alert('Error deleting post');
+            }
+        }
+
+        // View Post
+        function viewPost(slug) {
+            window.open(`blog-post.html?slug=${slug}`, '_blank');
+        }
+
+        // Manage Categories Modal
+        function manageCategoriesModal() {
+            loadCategoriesForManagement();
+            const modal = new bootstrap.Modal(document.getElementById('categoriesModal'));
+            modal.show();
+        }
+
+        // Load Categories for Management
+        async function loadCategoriesForManagement() {
+            try {
+                const response = await fetch('/api/admin/blog/categories');
+                const categories = await response.json();
+                
+                const categoriesList = document.getElementById('categoriesList');
+                
+                if (categories.length === 0) {
+                    categoriesList.innerHTML = '<p class="text-muted">No categories found.</p>';
+                    return;
+                }
+                
+                categoriesList.innerHTML = categories.map(category => `
+                    <div class="d-flex align-items-center justify-content-between border-bottom py-2">
+                        <div class="d-flex align-items-center">
+                            <span class="category-dot" style="background-color: ${category.color}"></span>
+                            <div>
+                                <strong>${escapeHtml(category.name)}</strong>
+                                <small class="d-block text-muted">${category.post_count} posts</small>
+                            </div>
+                        </div>
+                        <small class="text-muted">${category.description || 'No description'}</small>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById('categoriesList').innerHTML = '<p class="text-danger">Error loading categories</p>';
+            }
+        }
+
+        // Save Category
+        async function saveCategory() {
+            try {
+                const formData = {
+                    name: document.getElementById('categoryName').value,
+                    description: document.getElementById('categoryDescription').value || null,
+                    color: document.getElementById('categoryColor').value
+                };
+                
+                const response = await fetch('/api/admin/blog/categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Category created successfully!');
+                    document.getElementById('categoryForm').reset();
+                    document.getElementById('categoryColor').value = '#cda45e';
+                    loadCategories();
+                    loadCategoriesForManagement();
+                } else {
+                    alert(result.error || 'Failed to create category');
+                }
+                
+            } catch (error) {
+                console.error('Error saving category:', error);
+                alert('Error saving category');
+            }
+        }
+
+        // Utility function
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/login.html';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

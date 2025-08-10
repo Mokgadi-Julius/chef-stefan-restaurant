@@ -147,6 +147,89 @@ const initializeDatabase = async () => {
             )
         `).catch(() => {}); // Ignore if exists
 
+        // Blog categories table
+        await query(`
+            CREATE TABLE IF NOT EXISTS blog_categories (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(100) NOT NULL UNIQUE,
+                slug VARCHAR(100) NOT NULL UNIQUE,
+                description TEXT,
+                color VARCHAR(7) DEFAULT '#cda45e',
+                display_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `).catch(() => {}); // Ignore if exists
+
+        // Blog posts table
+        await query(`
+            CREATE TABLE IF NOT EXISTS blog_posts (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                title VARCHAR(255) NOT NULL,
+                slug VARCHAR(255) NOT NULL UNIQUE,
+                excerpt TEXT,
+                content TEXT NOT NULL,
+                featured_image VARCHAR(500),
+                category_id UUID REFERENCES blog_categories(id) ON DELETE SET NULL,
+                author_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                status VARCHAR(20) DEFAULT 'draft', -- 'draft', 'published', 'archived'
+                seo_title VARCHAR(255),
+                seo_description VARCHAR(320),
+                seo_keywords TEXT,
+                view_count INTEGER DEFAULT 0,
+                reading_time INTEGER DEFAULT 5, -- estimated minutes
+                tags TEXT[], -- Array of tags
+                published_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `).catch(() => {}); // Ignore if exists
+
+        // Blog images table for managing uploaded images
+        await query(`
+            CREATE TABLE IF NOT EXISTS blog_images (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                filename VARCHAR(255) NOT NULL,
+                original_name VARCHAR(255) NOT NULL,
+                file_path VARCHAR(500) NOT NULL,
+                alt_text VARCHAR(255),
+                caption TEXT,
+                file_size INTEGER,
+                mime_type VARCHAR(100),
+                uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `).catch(() => {}); // Ignore if exists
+
+        // Create indexes for better performance
+        await query(`
+            CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status)
+        `).catch(() => {});
+        
+        await query(`
+            CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at DESC)
+        `).catch(() => {});
+        
+        await query(`
+            CREATE INDEX IF NOT EXISTS idx_blog_posts_category ON blog_posts(category_id)
+        `).catch(() => {});
+
+        await query(`
+            CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug)
+        `).catch(() => {});
+
+        // Insert default blog categories
+        await query(`
+            INSERT INTO blog_categories (name, slug, description, color, display_order) 
+            VALUES 
+                ('Recipes', 'recipes', 'Step-by-step cooking guides and signature dishes', '#e74c3c', 1),
+                ('Behind the Scenes', 'behind-the-scenes', 'Personal stories and kitchen insights', '#3498db', 2),
+                ('Culinary Tips', 'culinary-tips', 'Professional cooking techniques and advice', '#2ecc71', 3),
+                ('Events', 'events', 'Highlights from catering events and special occasions', '#f39c12', 4),
+                ('Seasonal', 'seasonal', 'Seasonal ingredients and menu inspirations', '#9b59b6', 5)
+            ON CONFLICT (slug) DO NOTHING
+        `).catch(() => {}); // Ignore if already exists
+
         console.log('Database tables initialized successfully');
     } catch (err) {
         if (err.message.includes('already exists') || err.message.includes('relation') && err.message.includes('already exists')) {

@@ -1266,6 +1266,464 @@ app.post('/api/cart-booking', async (req, res) => {
     }
 });
 
+// ======= BLOG API ENDPOINTS =======
+
+// Get all blog posts with pagination and filtering
+app.get('/api/blog/posts', async (req, res) => {
+    try {
+        const {
+            page = 1,
+            limit = 6,
+            category,
+            status = 'published',
+            search,
+            author
+        } = req.query;
+
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        let whereConditions = [`bp.status = $1`];
+        let queryParams = [status];
+        let paramCount = 1;
+
+        if (category) {
+            paramCount++;
+            whereConditions.push(`bc.slug = $${paramCount}`);
+            queryParams.push(category);
+        }
+
+        if (search) {
+            paramCount++;
+            whereConditions.push(`(bp.title ILIKE $${paramCount} OR bp.content ILIKE $${paramCount} OR bp.excerpt ILIKE $${paramCount})`);
+            queryParams.push(`%${search}%`);
+        }
+
+        if (author) {
+            paramCount++;
+            whereConditions.push(`bp.author_id = $${paramCount}`);
+            queryParams.push(author);
+        }
+
+        const whereClause = whereConditions.join(' AND ');
+
+        const postsQuery = `
+            SELECT 
+                bp.*,
+                bc.name as category_name,
+                bc.slug as category_slug,
+                bc.color as category_color,
+                u.first_name || ' ' || u.last_name as author_name
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            LEFT JOIN users u ON bp.author_id = u.id
+            WHERE ${whereClause}
+            ORDER BY bp.published_at DESC, bp.created_at DESC
+            LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
+        `;
+
+        queryParams.push(parseInt(limit), offset);
+
+        const result = await query(postsQuery, queryParams);
+
+        // Get total count for pagination
+        const countQuery = `
+            SELECT COUNT(*) as total
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            WHERE ${whereClause}
+        `;
+
+        const countResult = await query(countQuery, queryParams.slice(0, -2));
+        const totalPosts = parseInt(countResult.rows[0].total);
+        const totalPages = Math.ceil(totalPosts / parseInt(limit));
+
+        res.json({
+            posts: result.rows,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages,
+                totalPosts,
+                hasNextPage: parseInt(page) < totalPages,
+                hasPrevPage: parseInt(page) > 1
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        res.status(500).json({ error: 'Failed to fetch blog posts' });
+    }
+});
+
+// Get single blog post by slug
+app.get('/api/blog/posts/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const result = await query(`
+            SELECT 
+                bp.*,
+                bc.name as category_name,
+                bc.slug as category_slug,
+                bc.color as category_color,
+                u.first_name || ' ' || u.last_name as author_name
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            LEFT JOIN users u ON bp.author_id = u.id
+            WHERE bp.slug = $1 AND bp.status = 'published'
+        `, [slug]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        // Increment view count
+        await query(`
+            UPDATE blog_posts SET view_count = view_count + 1 
+            WHERE slug = $1
+        `, [slug]);
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error('Error fetching blog post:', error);
+        res.status(500).json({ error: 'Failed to fetch blog post' });
+    }
+});
+
+// Get blog categories
+app.get('/api/blog/categories', async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT 
+                bc.*,
+                COUNT(bp.id) as post_count
+            FROM blog_categories bc
+            LEFT JOIN blog_posts bp ON bc.id = bp.category_id AND bp.status = 'published'
+            GROUP BY bc.id, bc.name, bc.slug, bc.description, bc.color, bc.display_order, bc.created_at, bc.updated_at
+            ORDER BY bc.display_order, bc.name
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching blog categories:', error);
+        res.status(500).json({ error: 'Failed to fetch blog categories' });
+    }
+});
+
+// Get recent blog posts (for sidebar, etc.)
+app.get('/api/blog/recent', async (req, res) => {
+    try {
+        const { limit = 5 } = req.query;
+
+        const result = await query(`
+            SELECT 
+                bp.id, bp.title, bp.slug, bp.excerpt, bp.featured_image, 
+                bp.published_at, bp.reading_time,
+                bc.name as category_name, bc.color as category_color
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            WHERE bp.status = 'published'
+            ORDER BY bp.published_at DESC
+            LIMIT $1
+        `, [parseInt(limit)]);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching recent posts:', error);
+        res.status(500).json({ error: 'Failed to fetch recent posts' });
+    }
+});
+
+// ======= ADMIN BLOG ENDPOINTS =======
+
+// Get all posts for admin (including drafts)
+app.get('/api/admin/blog/posts', requireAuth, async (req, res) => {
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            status,
+            category,
+            search
+        } = req.query;
+
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        let whereConditions = [];
+        let queryParams = [];
+        let paramCount = 0;
+
+        if (status) {
+            paramCount++;
+            whereConditions.push(`bp.status = $${paramCount}`);
+            queryParams.push(status);
+        }
+
+        if (category) {
+            paramCount++;
+            whereConditions.push(`bp.category_id = $${paramCount}`);
+            queryParams.push(category);
+        }
+
+        if (search) {
+            paramCount++;
+            whereConditions.push(`(bp.title ILIKE $${paramCount} OR bp.content ILIKE $${paramCount})`);
+            queryParams.push(`%${search}%`);
+        }
+
+        const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+        const result = await query(`
+            SELECT 
+                bp.*,
+                bc.name as category_name,
+                bc.color as category_color,
+                u.first_name || ' ' || u.last_name as author_name
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            LEFT JOIN users u ON bp.author_id = u.id
+            ${whereClause}
+            ORDER BY bp.created_at DESC
+            LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
+        `, [...queryParams, parseInt(limit), offset]);
+
+        // Get total count
+        const countResult = await query(`
+            SELECT COUNT(*) as total
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            ${whereClause}
+        `, queryParams);
+
+        const totalPosts = parseInt(countResult.rows[0].total);
+
+        res.json({
+            posts: result.rows,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalPosts / parseInt(limit)),
+                totalPosts
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching admin blog posts:', error);
+        res.status(500).json({ error: 'Failed to fetch blog posts' });
+    }
+});
+
+// Create new blog post
+app.post('/api/admin/blog/posts', requireAuth, async (req, res) => {
+    try {
+        const {
+            title, content, excerpt, category_id, status = 'draft',
+            featured_image, seo_title, seo_description, seo_keywords, tags
+        } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({ error: 'Title and content are required' });
+        }
+
+        // Generate slug from title
+        const slug = title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim('-');
+
+        // Calculate reading time (average 200 words per minute)
+        const wordCount = content.split(' ').length;
+        const reading_time = Math.max(1, Math.ceil(wordCount / 200));
+
+        const id = uuidv4();
+        const author_id = req.session.user.id;
+        const published_at = status === 'published' ? new Date() : null;
+
+        const result = await query(`
+            INSERT INTO blog_posts (
+                id, title, slug, content, excerpt, category_id, author_id, 
+                status, featured_image, seo_title, seo_description, seo_keywords, 
+                tags, reading_time, published_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            RETURNING *
+        `, [
+            id, title, slug, content, excerpt, category_id, author_id,
+            status, featured_image, seo_title, seo_description, seo_keywords,
+            tags, reading_time, published_at
+        ]);
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        if (error.message.includes('duplicate key') && error.message.includes('slug')) {
+            return res.status(409).json({ error: 'A post with this title already exists. Please use a different title.' });
+        }
+        console.error('Error creating blog post:', error);
+        res.status(500).json({ error: 'Failed to create blog post' });
+    }
+});
+
+// Update blog post
+app.put('/api/admin/blog/posts/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            title, content, excerpt, category_id, status,
+            featured_image, seo_title, seo_description, seo_keywords, tags
+        } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({ error: 'Title and content are required' });
+        }
+
+        // Generate new slug if title changed
+        const slug = title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim('-');
+
+        // Calculate reading time
+        const wordCount = content.split(' ').length;
+        const reading_time = Math.max(1, Math.ceil(wordCount / 200));
+
+        // If changing to published and wasn't published before, set published_at
+        const currentPost = await query('SELECT status, published_at FROM blog_posts WHERE id = $1', [id]);
+        let published_at = currentPost.rows[0]?.published_at;
+        
+        if (status === 'published' && currentPost.rows[0]?.status !== 'published') {
+            published_at = new Date();
+        }
+
+        const result = await query(`
+            UPDATE blog_posts SET 
+                title = $1, slug = $2, content = $3, excerpt = $4, 
+                category_id = $5, status = $6, featured_image = $7, 
+                seo_title = $8, seo_description = $9, seo_keywords = $10, 
+                tags = $11, reading_time = $12, published_at = $13, 
+                updated_at = NOW()
+            WHERE id = $14
+            RETURNING *
+        `, [
+            title, slug, content, excerpt, category_id, status, featured_image,
+            seo_title, seo_description, seo_keywords, tags, reading_time, 
+            published_at, id
+        ]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        if (error.message.includes('duplicate key') && error.message.includes('slug')) {
+            return res.status(409).json({ error: 'A post with this title already exists. Please use a different title.' });
+        }
+        console.error('Error updating blog post:', error);
+        res.status(500).json({ error: 'Failed to update blog post' });
+    }
+});
+
+// Delete blog post
+app.delete('/api/admin/blog/posts/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await query('DELETE FROM blog_posts WHERE id = $1 RETURNING title', [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        res.json({ success: true, message: `Blog post "${result.rows[0].title}" deleted successfully` });
+
+    } catch (error) {
+        console.error('Error deleting blog post:', error);
+        res.status(500).json({ error: 'Failed to delete blog post' });
+    }
+});
+
+// Get single post for editing
+app.get('/api/admin/blog/posts/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await query(`
+            SELECT 
+                bp.*,
+                bc.name as category_name,
+                u.first_name || ' ' || u.last_name as author_name
+            FROM blog_posts bp
+            LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+            LEFT JOIN users u ON bp.author_id = u.id
+            WHERE bp.id = $1
+        `, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Blog post not found' });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error('Error fetching blog post for editing:', error);
+        res.status(500).json({ error: 'Failed to fetch blog post' });
+    }
+});
+
+// Blog category management
+app.get('/api/admin/blog/categories', requireAuth, async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT 
+                bc.*,
+                COUNT(bp.id) as post_count
+            FROM blog_categories bc
+            LEFT JOIN blog_posts bp ON bc.id = bp.category_id
+            GROUP BY bc.id
+            ORDER BY bc.display_order, bc.name
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching blog categories:', error);
+        res.status(500).json({ error: 'Failed to fetch blog categories' });
+    }
+});
+
+// Create blog category
+app.post('/api/admin/blog/categories', requireAuth, async (req, res) => {
+    try {
+        const { name, description, color, display_order } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Category name is required' });
+        }
+
+        const slug = name.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim('-');
+
+        const id = uuidv4();
+
+        const result = await query(`
+            INSERT INTO blog_categories (id, name, slug, description, color, display_order)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+        `, [id, name, slug, description, color || '#cda45e', display_order || 0]);
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        if (error.message.includes('duplicate key')) {
+            return res.status(409).json({ error: 'A category with this name already exists' });
+        }
+        console.error('Error creating blog category:', error);
+        res.status(500).json({ error: 'Failed to create blog category' });
+    }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Server error:', error);
