@@ -2,6 +2,16 @@ const API_BASE = '/api';
 
 // Handle catering form
 document.addEventListener('DOMContentLoaded', function() {
+  // Set minimum date for date picker (today)
+  const dateInput = document.getElementById('date');
+  if (dateInput) {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    dateInput.setAttribute('min', minDate);
+  }
+
   const bookingForm = document.getElementById('catering-form');
   if (bookingForm) {
     // Load menu booking data if available
@@ -11,6 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       
       const formData = new FormData(this);
+      
+      // Get dietary restrictions from checkboxes
+      const dietaryRestrictions = [];
+      const dietaryCheckboxes = this.querySelectorAll('input[name="dietary_restrictions"]:checked');
+      dietaryCheckboxes.forEach(checkbox => {
+        dietaryRestrictions.push(checkbox.value);
+      });
+      
+      // Add other dietary requirements if specified
+      const otherDietary = document.getElementById('other-dietary').value.trim();
+      if (otherDietary) {
+        dietaryRestrictions.push(otherDietary);
+      }
       
       // Get menu booking data from session storage
       const menuBookingData = JSON.parse(sessionStorage.getItem('menuBookingData') || '{}');
@@ -25,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         location: formData.get('location') || 'Client Location',
         meal_type: formData.get('meal_type'),
         occasion: formData.get('occasion'),
-        dietary_restrictions: formData.get('dietary_restrictions'),
+        dietary_restrictions: dietaryRestrictions.length > 0 ? dietaryRestrictions.join(', ') : null,
         food_style: formData.get('food_style'),
         additional_info: formData.get('additional_info'),
         selected_dishes: menuBookingData.items || null,

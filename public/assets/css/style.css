@@ -2527,6 +2527,215 @@ section {
 }
 
 /*--------------------------------------------------------------
+# Modern Form Styling
+--------------------------------------------------------------*/
+.modern-form {
+  background: rgba(26, 24, 20, 0.95);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(205, 164, 94, 0.2);
+}
+
+.form-section {
+  margin-bottom: 35px;
+  padding: 25px 0;
+  border-bottom: 1px solid rgba(205, 164, 94, 0.1);
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  color: #cda45e;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title i {
+  font-size: 20px;
+}
+
+.modern-form .form-group {
+  margin-bottom: 20px;
+}
+
+.modern-form label {
+  color: #cda45e;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.modern-form .form-control {
+  background: rgba(26, 24, 20, 0.8);
+  border: 2px solid rgba(205, 164, 94, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.modern-form .form-control:focus {
+  border-color: #cda45e;
+  box-shadow: 0 0 0 3px rgba(205, 164, 94, 0.1);
+  background: rgba(26, 24, 20, 0.95);
+}
+
+.modern-form .form-control::placeholder {
+  color: rgba(164, 155, 137, 0.7);
+}
+
+.modern-form select.form-control {
+  cursor: pointer;
+}
+
+.modern-form select.form-control option {
+  background: #1a1814;
+  color: white;
+  padding: 10px;
+}
+
+/* Dietary Restrictions Checkboxes */
+.dietary-options {
+  background: rgba(26, 24, 20, 0.5);
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(205, 164, 94, 0.2);
+}
+
+.dietary-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  padding: 8px 0;
+  transition: color 0.3s ease;
+}
+
+.checkbox-container:hover {
+  color: #cda45e;
+}
+
+.checkbox-container input {
+  display: none;
+}
+
+.checkmark {
+  height: 20px;
+  width: 20px;
+  background-color: transparent;
+  border: 2px solid rgba(205, 164, 94, 0.5);
+  border-radius: 4px;
+  margin-right: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.checkbox-container:hover .checkmark {
+  border-color: #cda45e;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #cda45e;
+  border-color: #cda45e;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Submit Button */
+.btn-submit {
+  background: linear-gradient(135deg, #cda45e 0%, #d4af6a 100%);
+  border: none;
+  padding: 15px 40px;
+  border-radius: 50px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 25px rgba(205, 164, 94, 0.3);
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, #d4af6a 0%, #e0bb76 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(205, 164, 94, 0.4);
+}
+
+.btn-submit i {
+  font-size: 18px;
+}
+
+.form-note {
+  color: rgba(164, 155, 137, 0.8);
+  font-size: 13px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.form-note i {
+  color: #cda45e;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .modern-form {
+    padding: 25px 20px;
+  }
+  
+  .dietary-checkboxes {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .btn-submit {
+    padding: 12px 30px;
+    font-size: 14px;
+  }
+}
+
+/*--------------------------------------------------------------
 # Footer
 --------------------------------------------------------------*/
 #footer {

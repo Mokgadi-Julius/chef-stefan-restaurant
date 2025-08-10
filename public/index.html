@@ -564,66 +564,201 @@
           <p>Book Your Private Chef Experience</p>
         </div>
 
-        <form id="catering-form" action="#" method="post" role="form" class="custom-email-form" data-aos="fade-up" data-aos-delay="100">
-          <div class="row">
-            <div class="col-lg-4 col-md-6 form-group">
-              <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3 mt-md-0">
-              <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3 mt-md-0">
-              <input type="text" class="form-control" name="phone" id="phone" placeholder="Your Phone" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <input type="text" name="event" class="form-control" id="event" placeholder="Event Type" data-rule="minlen:4" data-msg="Please enter event type">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <input type="text" name="date" class="form-control" id="date" placeholder="Event Date" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <input type="text" class="form-control" name="location" id="location" placeholder="Location" data-rule="minlen:4" data-msg="Please enter location">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <select class="form-control" name="meal_type" id="meal_type">
-                <option value="">Select Meal Type</option>
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-                <option value="multiple">Multiple Meals</option>
-              </select>
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <input type="text" class="form-control" name="time" id="time" placeholder="Time" data-rule="minlen:4" data-msg="Please enter at least 4 chars">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-4 col-md-6 form-group mt-3">
-              <input type="text" class="form-control" name="occasion" id="occasion" placeholder="Occasion" data-rule="minlen:4" data-msg="Please enter occasion">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-6 col-md-6 form-group mt-3">
-              <input type="text" class="form-control" name="dietary_restrictions" id="dietary_restrictions" placeholder="Dietary Restrictions">
-              <div class="validate"></div>
-            </div>
-            <div class="col-lg-6 col-md-6 form-group mt-3">
-              <input type="text" class="form-control" name="food_style" id="food_style" placeholder="Style of Food Preferred">
-              <div class="validate"></div>
+        <form id="catering-form" action="#" method="post" role="form" class="custom-email-form modern-form" data-aos="fade-up" data-aos-delay="100">
+          
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="bi bi-person-circle"></i> Personal Information
+            </h5>
+            <div class="row">
+              <div class="col-md-4 form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" name="name" class="form-control" id="name" placeholder="Enter your full name" required>
+              </div>
+              <div class="col-md-4 form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" class="form-control" name="email" id="email" placeholder="your@email.com" required>
+              </div>
+              <div class="col-md-4 form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" class="form-control" name="phone" id="phone" placeholder="+27 12 345 6789" required>
+              </div>
             </div>
           </div>
-          <div class="form-group mt-3">
-            <textarea class="form-control" name="additional_info" rows="5" placeholder="Any Additional Information? This information will assist us to create you a bespoke menu that fits your needs."></textarea>
-            <div class="validate"></div>
+
+          <!-- Event Details Section -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="bi bi-calendar-event"></i> Event Details
+            </h5>
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <label for="event">Event Type</label>
+                <select class="form-control" name="event" id="event">
+                  <option value="">Select Event Type</option>
+                  <option value="Birthday Party">Birthday Party</option>
+                  <option value="Anniversary">Anniversary</option>
+                  <option value="Corporate Event">Corporate Event</option>
+                  <option value="Wedding">Wedding</option>
+                  <option value="Dinner Party">Dinner Party</option>
+                  <option value="Family Gathering">Family Gathering</option>
+                  <option value="Holiday Celebration">Holiday Celebration</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-6 form-group">
+                <label for="occasion">Special Occasion</label>
+                <input type="text" class="form-control" name="occasion" id="occasion" placeholder="e.g., 50th Birthday, Company Launch">
+              </div>
+              <div class="col-md-4 form-group">
+                <label for="date">Event Date *</label>
+                <input type="date" name="date" class="form-control" id="date" required min="">
+              </div>
+              <div class="col-md-4 form-group">
+                <label for="time">Preferred Time *</label>
+                <select class="form-control" name="time" id="time" required>
+                  <option value="">Select Time</option>
+                  <option value="07:00">07:00 AM</option>
+                  <option value="07:30">07:30 AM</option>
+                  <option value="08:00">08:00 AM</option>
+                  <option value="08:30">08:30 AM</option>
+                  <option value="09:00">09:00 AM</option>
+                  <option value="09:30">09:30 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="10:30">10:30 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="11:30">11:30 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="12:30">12:30 PM</option>
+                  <option value="13:00">01:00 PM</option>
+                  <option value="13:30">01:30 PM</option>
+                  <option value="14:00">02:00 PM</option>
+                  <option value="14:30">02:30 PM</option>
+                  <option value="15:00">03:00 PM</option>
+                  <option value="15:30">03:30 PM</option>
+                  <option value="16:00">04:00 PM</option>
+                  <option value="16:30">04:30 PM</option>
+                  <option value="17:00">05:00 PM</option>
+                  <option value="17:30">05:30 PM</option>
+                  <option value="18:00">06:00 PM</option>
+                  <option value="18:30">06:30 PM</option>
+                  <option value="19:00">07:00 PM</option>
+                  <option value="19:30">07:30 PM</option>
+                  <option value="20:00">08:00 PM</option>
+                  <option value="20:30">08:30 PM</option>
+                  <option value="21:00">09:00 PM</option>
+                  <option value="21:30">09:30 PM</option>
+                  <option value="22:00">10:00 PM</option>
+                </select>
+              </div>
+              <div class="col-md-4 form-group">
+                <label for="meal_type">Meal Type *</label>
+                <select class="form-control" name="meal_type" id="meal_type" required>
+                  <option value="">Select Meal Type</option>
+                  <option value="breakfast">Breakfast</option>
+                  <option value="brunch">Brunch</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="afternoon-tea">Afternoon Tea</option>
+                  <option value="dinner">Dinner</option>
+                  <option value="cocktail-party">Cocktail Party</option>
+                  <option value="multiple-meals">Multiple Meals</option>
+                </select>
+              </div>
+              <div class="col-12 form-group">
+                <label for="location">Event Location *</label>
+                <input type="text" class="form-control" name="location" id="location" placeholder="Full address or venue name" required>
+              </div>
+            </div>
           </div>
-          <div class="mb-3">
+
+          <!-- Culinary Preferences Section -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="bi bi-heart"></i> Culinary Preferences
+            </h5>
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <label for="food_style">Cuisine Style</label>
+                <select class="form-control" name="food_style" id="food_style">
+                  <option value="">Select Cuisine Style</option>
+                  <option value="Contemporary South African">Contemporary South African</option>
+                  <option value="Traditional African">Traditional African</option>
+                  <option value="Mediterranean">Mediterranean</option>
+                  <option value="Italian">Italian</option>
+                  <option value="French">French</option>
+                  <option value="Asian Fusion">Asian Fusion</option>
+                  <option value="Indian">Indian</option>
+                  <option value="Middle Eastern">Middle Eastern</option>
+                  <option value="International">International</option>
+                  <option value="Fusion">Fusion</option>
+                  <option value="Surprise Me">Chef's Choice / Surprise Me</option>
+                </select>
+              </div>
+              <div class="col-md-6 form-group">
+                <label for="dietary_restrictions">Dietary Requirements</label>
+                <div class="dietary-options">
+                  <div class="dietary-checkboxes">
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Vegetarian">
+                      <span class="checkmark"></span> Vegetarian
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Vegan">
+                      <span class="checkmark"></span> Vegan
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Gluten-Free">
+                      <span class="checkmark"></span> Gluten-Free
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Dairy-Free">
+                      <span class="checkmark"></span> Dairy-Free
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Halal">
+                      <span class="checkmark"></span> Halal
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="dietary_restrictions" value="Kosher">
+                      <span class="checkmark"></span> Kosher
+                    </label>
+                  </div>
+                  <input type="text" class="form-control mt-2" placeholder="Other dietary requirements..." id="other-dietary">
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="text-center"><button type="submit">Submit Catering Inquiry</button></div>
+
+          <!-- Additional Information Section -->
+          <div class="form-section">
+            <h5 class="section-title">
+              <i class="bi bi-chat-dots"></i> Additional Information
+            </h5>
+            <div class="form-group">
+              <label for="additional_info">Special Requests & Additional Details</label>
+              <textarea class="form-control" name="additional_info" id="additional_info" rows="4" 
+                placeholder="Tell us about:
+• Number of guests
+• Any allergies or specific dietary needs
+• Special menu preferences
+• Equipment or setup requirements
+• Any other special requests
+
+This information helps us create your perfect bespoke menu experience!"></textarea>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn-submit">
+              <i class="bi bi-send"></i> 
+              Book Your Private Chef Experience
+            </button>
+            <p class="form-note">
+              <i class="bi bi-info-circle"></i> 
+              We'll contact you within 24 hours to discuss your bespoke menu and confirm details.
+            </p>
+          </div>
         </form>
 
       </div>
