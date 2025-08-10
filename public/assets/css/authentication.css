@@ -18,6 +18,18 @@
   color: #a49b89;
 }
 
+.custom-email-form .form-control,
+.custom-email-form .form-select {
+  background-color: #0c0b09;
+  border-color: #625b4b;
+  color: white;
+}
+
+.custom-email-form .form-control::placeholder,
+.custom-email-form .form-select::placeholder {
+  color: #a49b89;
+}
+
 body{
     background-color: #6e4107;
     background: linear-gradient(to right, #c9c4bf, #a5855e);

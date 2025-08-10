@@ -1353,6 +1353,109 @@ section {
   background: #d3af71;
 }
 
+/* Custom Email Form Styles (same as php-email-form) */
+.book-a-table .custom-email-form {
+  width: 100%;
+}
+
+.book-a-table .custom-email-form .form-group {
+  padding-bottom: 8px;
+}
+
+.book-a-table .custom-email-form .validate {
+  display: none;
+  color: red;
+  margin: 0 0 15px 0;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.book-a-table .custom-email-form .error-message {
+  display: none;
+  color: #fff;
+  background: #ed3c0d;
+  text-align: left;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.book-a-table .custom-email-form .error-message br + br {
+  margin-top: 25px;
+}
+
+.book-a-table .custom-email-form .sent-message {
+  display: none;
+  color: #fff;
+  background: #18d26e;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.book-a-table .custom-email-form .loading {
+  display: none;
+  text-align: center;
+  padding: 15px;
+}
+
+.book-a-table .custom-email-form .loading:before {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  margin: 0 10px -6px 0;
+  border: 3px solid #cda45e;
+  border-top-color: #eee;
+  animation: animate-loading 1s linear infinite;
+}
+
+.book-a-table .custom-email-form input, .book-a-table .custom-email-form textarea {
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 14px;
+  background: #1a1814;
+  border: 1px solid #625b4b;
+  color: white;
+}
+
+.book-a-table .custom-email-form input::-webkit-input-placeholder, .book-a-table .custom-email-form textarea::-webkit-input-placeholder {
+  color: #a49b89;
+}
+
+.book-a-table .custom-email-form input::-moz-placeholder, .book-a-table .custom-email-form textarea::-moz-placeholder {
+  color: #a49b89;
+}
+
+.book-a-table .custom-email-form input::placeholder, .book-a-table .custom-email-form textarea::placeholder {
+  color: #a49b89;
+}
+
+.book-a-table .custom-email-form input:focus, .book-a-table .custom-email-form textarea:focus {
+  border-color: #cda45e;
+}
+
+.book-a-table .custom-email-form input {
+  height: 44px;
+}
+
+.book-a-table .custom-email-form textarea {
+  padding: 10px 12px;
+}
+
+.book-a-table .custom-email-form button[type="submit"] {
+  background: #cda45e;
+  border: 0;
+  padding: 10px 35px;
+  color: #fff;
+  transition: 0.4s;
+  border-radius: 50px;
+}
+
+.book-a-table .custom-email-form button[type="submit"]:hover {
+  background: #d3af71;
+}
+
 /*--------------------------------------------------------------
 # Testimonials
 --------------------------------------------------------------*/
@@ -2174,6 +2277,105 @@ section {
 }
 
 .contact .php-email-form button[type="submit"]:hover {
+  background: #d3af71;
+}
+
+/* Custom Email Form Styles for Contact (same as php-email-form) */
+.contact .custom-email-form {
+  width: 100%;
+}
+
+.contact .custom-email-form .form-group {
+  padding-bottom: 8px;
+}
+
+.contact .custom-email-form .validate {
+  display: none;
+  color: red;
+  margin: 0 0 15px 0;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.contact .custom-email-form .error-message {
+  display: none;
+  color: #fff;
+  background: #ed3c0d;
+  text-align: left;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.contact .custom-email-form .sent-message {
+  display: none;
+  color: #fff;
+  background: #18d26e;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.contact .custom-email-form .loading {
+  display: none;
+  text-align: center;
+  padding: 15px;
+}
+
+.contact .custom-email-form .loading:before {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  margin: 0 10px -6px 0;
+  border: 3px solid #cda45e;
+  border-top-color: #eee;
+  animation: animate-loading 1s linear infinite;
+}
+
+.contact .custom-email-form input, .contact .custom-email-form textarea {
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 14px;
+  background: #1a1814;
+  border: 1px solid #625b4b;
+  color: white;
+}
+
+.contact .custom-email-form input::-webkit-input-placeholder, .contact .custom-email-form textarea::-webkit-input-placeholder {
+  color: #a49b89;
+}
+
+.contact .custom-email-form input::-moz-placeholder, .contact .custom-email-form textarea::-moz-placeholder {
+  color: #a49b89;
+}
+
+.contact .custom-email-form input::placeholder, .contact .custom-email-form textarea::placeholder {
+  color: #a49b89;
+}
+
+.contact .custom-email-form input:focus, .contact .custom-email-form textarea:focus {
+  border-color: #cda45e;
+}
+
+.contact .custom-email-form input {
+  height: 44px;
+}
+
+.contact .custom-email-form textarea {
+  padding: 10px 12px;
+}
+
+.contact .custom-email-form button[type="submit"] {
+  background: #cda45e;
+  border: 0;
+  padding: 10px 35px;
+  color: #fff;
+  transition: 0.4s;
+  border-radius: 50px;
+}
+
+.contact .custom-email-form button[type="submit"]:hover {
   background: #d3af71;
 }
 
