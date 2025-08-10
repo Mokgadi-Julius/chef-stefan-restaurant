@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -797,7 +798,7 @@ app.post('/api/contact', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Website" <${process.env.SMTP_USER}>`,
-            to: 'info@privatechefstefan.co.za',
+            to: 'juliusmokgadilanga5@gmail.com',
             replyTo: email,
             subject: `Contact Form: ${subject}`,
             html: emailHtml
@@ -897,7 +898,10 @@ app.post('/api/book-table', async (req, res) => {
                     ` : ''}
                     
                     <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
-                        <strong style="color: #1a1814;">⚡ Action Required:</strong> Please contact ${name} at ${email} or ${phone} to confirm this booking.
+                        <strong style="color: #1a1814;">📞 Contact Private Chef Stefan:</strong><br>
+                        Email: info@privatechefstefan.co.za<br>
+                        Phone: +27 (0) 82 123 4567<br>
+                        <em>We will contact you shortly to confirm your booking!</em>
                     </div>
                     
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
@@ -911,7 +915,7 @@ app.post('/api/book-table', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Bookings" <${process.env.SMTP_USER}>`,
-            to: 'info@privatechefstefan.co.za',
+            to: 'juliusmokgadilanga5@gmail.com',
             replyTo: email,
             subject: `New Booking Request - ${name} for ${date} at ${time}`,
             html: emailHtml
@@ -1050,7 +1054,10 @@ app.post('/api/catering-inquiry', async (req, res) => {
                     ` : ''}
                     
                     <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
-                        <strong style="color: #1a1814;">⚡ Action Required:</strong> Please contact ${customer_name} at ${customer_email} or ${customer_phone} to discuss their catering requirements.
+                        <strong style="color: #1a1814;">📞 Contact Private Chef Stefan:</strong><br>
+                        Email: info@privatechefstefan.co.za<br>
+                        Phone: +27 (0) 82 123 4567<br>
+                        <em>We will contact you shortly to discuss your catering requirements!</em>
                     </div>
                     
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
@@ -1064,7 +1071,7 @@ app.post('/api/catering-inquiry', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Catering" <${process.env.SMTP_USER}>`,
-            to: 'info@privatechefstefan.co.za',
+            to: 'juliusmokgadilanga5@gmail.com',
             replyTo: customer_email,
             subject: `Catering Inquiry - ${customer_name} for ${event_date}`,
             html: emailHtml
