@@ -44,7 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage(result.message || 'Your catering inquiry was sent. We will contact you shortly to discuss your bespoke menu and confirm details. Thank you!', 'success', 'catering-form');
+          showPopupNotification(
+            'Catering Inquiry Sent!',
+            'Thank you! We will contact you shortly to discuss your bespoke menu and confirm all details.',
+            'success'
+          );
           
           // Clear menu booking data from session storage
           sessionStorage.removeItem('menuBookingData');
@@ -56,11 +60,19 @@ document.addEventListener('DOMContentLoaded', function() {
           hideMenuSummary();
           
         } else {
-          showMessage(result.error || 'Failed to send catering inquiry', 'error', 'catering-form');
+          showPopupNotification(
+            'Failed to Send Inquiry',
+            result.error || 'Something went wrong. Please try again.',
+            'error'
+          );
         }
       } catch (error) {
         console.error('Error:', error);
-        showMessage('Failed to send catering inquiry. Please try again.', 'error', 'catering-form');
+        showPopupNotification(
+          'Connection Error',
+          'Failed to send catering inquiry. Please check your connection and try again.',
+          'error'
+        );
       }
     });
   }
@@ -92,46 +104,101 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
         
         if (response.ok) {
-          showMessage(result.message || 'Your message has been sent successfully!', 'success', 'contact-form');
+          showPopupNotification(
+            'Message Sent Successfully!',
+            'Thank you for contacting Private Chef Stefan. We will get back to you shortly.',
+            'success'
+          );
           this.reset();
         } else {
-          showMessage(result.error || 'Failed to send message', 'error', 'contact-form');
+          showPopupNotification(
+            'Failed to Send Message',
+            result.error || 'Something went wrong. Please try again.',
+            'error'
+          );
         }
       } catch (error) {
         console.error('Error:', error);
-        showMessage('Failed to send message', 'error', 'contact-form');
+        showPopupNotification(
+          'Connection Error',
+          'Failed to send message. Please check your connection and try again.',
+          'error'
+        );
       }
     });
   }
 });
 
-// Show message function
-function showMessage(message, type, formId = null) {
-  // Remove existing messages
-  const existingMessages = document.querySelectorAll('.form-message');
-  existingMessages.forEach(msg => msg.remove());
+// Popup notification system
+function showPopupNotification(title, message, type = 'success', duration = 5000) {
+  // Remove existing notifications
+  const existingNotifications = document.querySelectorAll('.popup-notification');
+  existingNotifications.forEach(notification => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 400);
+  });
 
-  // Create new message element
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `form-message alert ${type === 'success' ? 'alert-success' : 'alert-danger'}`;
-  messageDiv.innerHTML = `<strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}`;
-  messageDiv.style.cssText = 'margin: 20px 0; padding: 15px; border-radius: 5px; font-weight: 500;';
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `popup-notification ${type}`;
   
-  // Insert message before the specific form or find the active form
-  let targetForm = formId ? document.getElementById(formId) : document.querySelector('form');
-  if (targetForm) {
-    targetForm.parentNode.insertBefore(messageDiv, targetForm);
-    
-    // Scroll to message
-    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
-    // Auto-remove message after 6 seconds
-    setTimeout(() => {
-      if (messageDiv.parentNode) {
-        messageDiv.remove();
-      }
-    }, 6000);
+  // Choose icon based on type
+  let icon = '';
+  switch(type) {
+    case 'success':
+      icon = '✓';
+      break;
+    case 'error':
+      icon = '✕';
+      break;
+    case 'info':
+      icon = 'ℹ';
+      break;
+    default:
+      icon = '✓';
   }
+  
+  notification.innerHTML = `
+    <div class="popup-notification-content">
+      <div class="popup-notification-icon">${icon}</div>
+      <div class="popup-notification-text">
+        <div class="popup-notification-title">${title}</div>
+        <div class="popup-notification-message">${message}</div>
+      </div>
+    </div>
+    <button class="popup-notification-close" onclick="closeNotification(this)">×</button>
+    <div class="popup-notification-progress"></div>
+  `;
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Trigger animation
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 100);
+  
+  // Auto-remove after duration
+  setTimeout(() => {
+    closeNotification(notification.querySelector('.popup-notification-close'));
+  }, duration);
+}
+
+// Close notification function
+function closeNotification(button) {
+  const notification = button.closest('.popup-notification');
+  notification.classList.remove('show');
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.remove();
+    }
+  }, 400);
+}
+
+// Show message function (updated to use popup)
+function showMessage(message, type, formId = null) {
+  const title = type === 'success' ? 'Success!' : type === 'error' ? 'Error!' : 'Info!';
+  showPopupNotification(title, message, type);
 }
 
 // Load menu booking data and display it in the booking form
@@ -222,5 +289,10 @@ function hideMenuSummary() {
 function clearMenuBooking() {
   sessionStorage.removeItem('menuBookingData');
   hideMenuSummary();
-  showMessage('Menu selection cleared', 'info', 'catering-form');
+  showPopupNotification(
+    'Menu Cleared',
+    'Your menu selection has been cleared successfully.',
+    'info',
+    3000
+  );
 }
