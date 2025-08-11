@@ -171,7 +171,7 @@ const initializeDatabase = async () => {
                 content TEXT NOT NULL,
                 featured_image VARCHAR(500),
                 category_id UUID REFERENCES blog_categories(id) ON DELETE SET NULL,
-                author_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                author_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
                 status VARCHAR(20) DEFAULT 'draft', -- 'draft', 'published', 'archived'
                 seo_title VARCHAR(255),
                 seo_description VARCHAR(320),
@@ -196,7 +196,7 @@ const initializeDatabase = async () => {
                 caption TEXT,
                 file_size INTEGER,
                 mime_type VARCHAR(100),
-                uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+                uploaded_by VARCHAR(255) REFERENCES users(id) ON DELETE SET NULL,
                 created_at TIMESTAMP DEFAULT NOW()
             )
         `).catch(() => {}); // Ignore if exists
