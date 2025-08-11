@@ -643,6 +643,29 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(26, 24, 20, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: white;
+    ">
+        <div class="text-center">
+            <div class="spinner-border text-warning mb-3" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5>Loading Admin Panel...</h5>
+            <p class="text-muted">Checking authentication and loading data</p>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/aos/aos.js"></script>
@@ -655,11 +678,55 @@
         let quillEditor;
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthentication();
-            initializeQuillEditor();
-            loadCategories();
-            loadBlogPosts();
+        // Check Authentication
+        async function checkAuthentication() {
+            try {
+                const response = await fetch('/api/admin/blog/posts?limit=1');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login.html?message=Please log in to access admin features';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const isAuthenticated = await checkAuthentication();
+                if (!isAuthenticated) return;
+                
+                // Initialize components
+                initializeQuillEditor();
+                await loadCategories();
+                await loadBlogPosts();
+                
+                // Hide loading overlay
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Failed to initialize admin panel:', error);
+                
+                // Show error message
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.innerHTML = `
+                        <div class="text-center">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h5 class="text-danger mt-3">Failed to Load Admin Panel</h5>
+                            <p class="text-muted">Please check your connection and try again.</p>
+                            <button class="btn btn-warning" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> Reload Page
+                            </button>
+                        </div>
+                    `;
+                }
+            }
             
             // Initialize AOS
             if (typeof AOS !== 'undefined') {
@@ -726,6 +793,17 @@
                 });
                 
                 const response = await fetch(`/api/admin/blog/posts?${params}`);
+                
+                if (response.status === 401 || response.status === 403) {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/login.html?message=Please log in to access admin features';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 renderPostsTable(data.posts);
@@ -734,7 +812,13 @@
             } catch (error) {
                 console.error('Error loading blog posts:', error);
                 document.getElementById('postsTableBody').innerHTML = 
-                    '<tr><td colspan="6" class="text-center text-danger">Error loading posts</td></tr>';
+                    `<tr><td colspan="6" class="text-center text-danger">
+                        <i class="bi bi-exclamation-triangle"></i><br>
+                        Error loading posts. Please check your connection and try again.
+                        <br><button class="btn btn-primary btn-sm mt-2" onclick="loadBlogPosts()">
+                            <i class="bi bi-arrow-clockwise"></i> Retry
+                        </button>
+                    </td></tr>`;
             }
         }
 
@@ -1009,6 +1093,16 @@
         async function loadCategoriesForManagement() {
             try {
                 const response = await fetch('/api/admin/blog/categories');
+                
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login.html?message=Please log in to access admin features';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const categories = await response.json();
                 
                 const categoriesList = document.getElementById('categoriesList');
