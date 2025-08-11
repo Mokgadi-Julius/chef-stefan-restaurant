@@ -4,23 +4,45 @@ Allow: /
 # Sitemap location
 Sitemap: https://chefstefan.co.za/sitemap.xml
 
-# Block access to admin and forms
-Disallow: /forms/
+# Block access to admin pages and forms
+Disallow: /admin*
 Disallow: /Admin.html
 Disallow: /authentication.html
+Disallow: /login.html
+Disallow: /forms/
+Disallow: /api/admin/
+Disallow: /.env
 
-# Allow important pages
+# Allow important SEO pages for Cape Town private chef searches
 Allow: /index.html
-Allow: /pricing.html
+Allow: /menu.html
+Allow: /cart.html
+Allow: /blog.html
+Allow: /blog-post.html
+Allow: /gallery.html
 Allow: /chef-info.html
 Allow: /assets/
+Allow: /api/blog/
 
-# Crawl delay (optional)
+# Allow robots to crawl images for local business SEO
+Allow: /assets/img/
+
+# Crawl delay to be respectful to server
 Crawl-delay: 1
 
-# Block specific bad bots (optional)
+# Block SEO audit bots that don't provide value
 User-agent: SemrushBot
 Disallow: /
 
-User-agent: AhrefsBot  
+User-agent: AhrefsBot
 Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+# Allow Google and Bing for local search optimization
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /

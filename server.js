@@ -1724,6 +1724,146 @@ app.post('/api/admin/blog/categories', requireAuth, async (req, res) => {
     }
 });
 
+// Dynamic sitemap.xml generator
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        res.set('Content-Type', 'text/xml');
+        
+        // Get all published blog posts for sitemap
+        let blogPosts = [];
+        try {
+            const result = await query(`
+                SELECT slug, updated_at, published_at 
+                FROM blog_posts 
+                WHERE status = 'published' 
+                ORDER BY published_at DESC
+            `);
+            blogPosts = result.rows;
+        } catch (error) {
+            console.log('No blog posts found for sitemap');
+        }
+
+        const currentDate = new Date().toISOString().split('T')[0];
+        
+        let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage - Primary landing page for Cape Town private chef searches -->
+  <url>
+    <loc>https://chefstefan.co.za/</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://chefstefan.co.za/assets/img/chef-stefan-hero.jpg</image:loc>
+      <image:title>Chef Stefan Bekker - Award-Winning Private Chef Cape Town</image:title>
+      <image:caption>International award-winning private chef serving Cape Town, Stellenbosch, and Western Cape</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Menu Page - High value for "private chef menu cape town" searches -->
+  <url>
+    <loc>https://chefstefan.co.za/menu.html</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Cart Page - For booking flow -->
+  <url>
+    <loc>https://chefstefan.co.za/cart.html</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog - Fresh content for SEO -->
+  <url>
+    <loc>https://chefstefan.co.za/blog.html</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Gallery - Visual content for engagement -->
+  <url>
+    <loc>https://chefstefan.co.za/gallery.html</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Chef Information Page - Authority building -->
+  <url>
+    <loc>https://chefstefan.co.za/chef-info.html</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://chefstefan.co.za/assets/img/chef-stefan-profile.jpg</image:loc>
+      <image:title>Chef Stefan Bekker Professional Portrait</image:title>
+      <image:caption>Executive chef with 19 years experience in luxury hospitality across Cape Town and Western Cape</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Service Pages (anchors to main page) -->
+  <url>
+    <loc>https://chefstefan.co.za/#services</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#book-a-table</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#contact</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <url>
+    <loc>https://chefstefan.co.za/#about</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+
+        // Add individual blog posts to sitemap
+        blogPosts.forEach(post => {
+            const lastMod = post.updated_at ? new Date(post.updated_at).toISOString().split('T')[0] : currentDate;
+            sitemap += `
+
+  <!-- Blog Post: ${post.slug} -->
+  <url>
+    <loc>https://chefstefan.co.za/blog-post.html?slug=${post.slug}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+        });
+
+        sitemap += `
+
+</urlset>`;
+
+        res.send(sitemap);
+
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        
+        // Fallback to static sitemap
+        res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+    }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Server error:', error);
