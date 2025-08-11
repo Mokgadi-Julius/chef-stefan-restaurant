@@ -798,7 +798,7 @@ app.post('/api/contact', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Website" <${process.env.SMTP_USER}>`,
-            to: 'juliusmokgadilanga5@gmail.com',
+            to: 'info@privatechefstefan.co.za',
             replyTo: email,
             subject: `Contact Form: ${subject}`,
             html: emailHtml
@@ -915,7 +915,7 @@ app.post('/api/book-table', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Bookings" <${process.env.SMTP_USER}>`,
-            to: 'juliusmokgadilanga5@gmail.com',
+            to: 'info@privatechefstefan.co.za',
             replyTo: email,
             subject: `New Booking Request - ${name} for ${date} at ${time}`,
             html: emailHtml
@@ -1071,7 +1071,7 @@ app.post('/api/catering-inquiry', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Catering" <${process.env.SMTP_USER}>`,
-            to: 'juliusmokgadilanga5@gmail.com',
+            to: 'info@privatechefstefan.co.za',
             replyTo: customer_email,
             subject: `Catering Inquiry - ${customer_name} for ${event_date}`,
             html: emailHtml
@@ -1224,7 +1224,7 @@ app.post('/api/cart-booking', async (req, res) => {
         // Send email
         await emailTransporter.sendMail({
             from: `"Chef Stefan Cart Booking" <${process.env.SMTP_USER}>`,
-            to: 'juliusmokgadilanga5@gmail.com',
+            to: 'info@privatechefstefan.co.za',
             replyTo: customer_email,
             subject: `Cart Booking Request - ${customer_name} for ${event_date} at ${event_time}`,
             html: emailHtml
